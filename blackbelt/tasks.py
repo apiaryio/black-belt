@@ -1,6 +1,6 @@
 import argparse
 
-import trello
+import handle_trello
 
 def trello_arguments(parent_parser, subparser):
     trello_parser = subparser.add_parser("t", help="Trello",                                                                                    
@@ -43,7 +43,7 @@ def define_arguments():
     args = main_parser.parse_args()
 
     DISPATCH_MAP = {
-        't' : trello.dispatch_command
+        't' : handle_trello.dispatch_command
     }
 
     if args.service_command in DISPATCH_MAP:
