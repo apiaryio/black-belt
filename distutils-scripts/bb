@@ -1,0 +1,5 @@
+#!/bin/env python
+
+from blackbelt.tasks import main
+
+main()
