@@ -3,6 +3,7 @@ import sys
 
 from trello import TrelloApi
 
+TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
 def dispatch_command(args):
     if 'TRELLO_API_KEY' not in os.environ:
@@ -17,6 +18,9 @@ def dispatch_command(args):
     if args.action_command in ACTION_COMMAND_MAP:
         ACTION_COMMAND_MAP[args.action_command](args)
 
+
+def get_token_url():
+    return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
 
 
 def migrate_label_command(args):

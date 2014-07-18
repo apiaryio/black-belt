@@ -1,5 +1,6 @@
 import argparse
 
+import handle_init
 import handle_trello
 
 def trello_arguments(parent_parser, subparser):
@@ -37,13 +38,22 @@ def define_arguments():
     service_subparsers = main_parser.add_subparsers(title="service",                                                                                         
                     dest="service_command")
 
+    # bb init
+    trello_parser = service_subparsers.add_parser("init", help="Initialize app and store all the tokens",                                                                                    
+                    parents=[parent_parser])
+
+
+
     trello_arguments(parent_parser, service_subparsers)
+
+
 
 
     args = main_parser.parse_args()
 
     DISPATCH_MAP = {
-        't' : handle_trello.dispatch_command
+        't' :    handle_trello.dispatch_command,
+        'init' : handle_init.dispatch_command
     }
 
     if args.service_command in DISPATCH_MAP:
