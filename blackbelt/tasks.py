@@ -17,6 +17,19 @@ def trello_arguments(parent_parser, subparser):
         migrate_parser.add_argument('--'+l, dest=l.replace('-', '_'))
 
 
+def github_arguments(parent_parser, subparser):
+    github_parser = subparser.add_parser("gh", help="Github",
+                    parents=[parent_parser])
+    
+    action_subparser = trello_parser.add_subparsers(title="action",                                                                                         
+                     dest="action_command")                                                                                                               
+
+    migrate_parser = action_subparser.add_parser("pr", help="Send pull request from currnent branch",
+                    parents=[parent_parser])
+
+    # for l in ['label', 'board', 'column', 'board-to', 'column-to']:
+    #     migrate_parser.add_argument('--'+l, dest=l.replace('-', '_'))
+
 
 def define_arguments():
     # parser = argparse.ArgumentParser(
@@ -45,6 +58,7 @@ def define_arguments():
 
 
     trello_arguments(parent_parser, service_subparsers)
+    github_arguments(parent_parser, service_subparsers)
 
 
 
@@ -52,8 +66,9 @@ def define_arguments():
     args = main_parser.parse_args()
 
     DISPATCH_MAP = {
+        'init' : handle_init.dispatch_command,
         't' :    handle_trello.dispatch_command,
-        'init' : handle_init.dispatch_command
+        'gh' : handle_github.dispatch_command
     }
 
     if args.service_command in DISPATCH_MAP:
