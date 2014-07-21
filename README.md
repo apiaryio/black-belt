@@ -15,7 +15,10 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 virtualenv venv
 source venv/bin/activate
 python setup.py develop
+python setup.py test
 ```
+
+
 
 ## Usage
 
@@ -28,6 +31,8 @@ and follow instructions.
 ### Github
 
 Handled by `bb gh` subcommand.
+
+Assumes cloning from `git@github.com:apiaryio/apiary.git` format.
 
 #### Making a pull request
 

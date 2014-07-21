@@ -1,4 +1,5 @@
 import os
+import re
 from subprocess import check_output
 import sys
 
@@ -29,6 +30,14 @@ def pr_command(args):
 def get_github_repo():
     return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
 
+def get_remote_repo_info(github_repo_info):
+    # 'git@github.com:apiaryio/apiary.git'
+    match = re.match("^.*github.com\:(?P<owner>[a-z]+)\/{1}(?P<name>[a-z]+)\.git$", github_repo_info)
+    if not match:
+        raise ValueError("Cannot parse repo info. Bad remote?")
+    return match.groupdict()
+
+
 
 def pull_request():
     branch = get_current_branch()
@@ -47,15 +56,14 @@ Pull request for [%(name)s](%(url)s).
 
     """ % ticket
 
-    #FIXME, parser owner as well
-    name = repo.split('/')[1].split('.')[0]
+    repo_info = get_remote_repo_info(repo)
 
-    url = "https://api.github.com/repos/apiaryio/%s/pulls" % name
+    url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls" % repo_info
 
     payload = {
         'title': ticket['name'],
         'base': 'master',
-        'head': "apiaryio:%s" % branch,
+        'head': "%(owner)s:%(branch)s" % {'branch': branch, 'owner': repo_info['owner']),
         'body': pr_description
     }
 
