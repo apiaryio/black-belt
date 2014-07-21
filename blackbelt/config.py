@@ -6,7 +6,7 @@ try:
 	configFile = expanduser('~/.blackbelt')
 	with open(configFile) as f:
 		config = json.loads(f.read())		
-except OSError:
+except IOError:
 	config = {
 		'trello': {},
 		'github': {}
