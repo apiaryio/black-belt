@@ -73,7 +73,7 @@ Pull request for [%(name)s](%(url)s).
 
     pr_info = r.json()
 
-    ticket_comment = "Sending [pull request #%(number)s](%(url)s)" % pr_info
+    ticket_comment = "Sending [pull request #%(number)s](%(html_url)s)" % pr_info
 
     comment_ticket(ticket, ticket_comment)
 
