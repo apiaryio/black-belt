@@ -15,6 +15,7 @@ setup(
     url='http://github.com/apiaryio/black-belt',
     license='MIT',
     packages=['blackbelt'],
+    install_requires=['requests', 'trello', 'PyGithub'],
     tests_require=['nose', 'virtualenv'],
     classifiers=[
         "Intended Audience :: Developers",
