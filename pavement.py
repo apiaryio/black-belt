@@ -3,7 +3,7 @@ from paver.setuputils import setup
 
 options = environment.options
 
-VERSION = '0.3'
+VERSION = '0.4.0'
 
 setup(
     name='blackbelt',
