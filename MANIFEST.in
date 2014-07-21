@@ -4,4 +4,4 @@ include setup.py
 include LICENSE
 include paver-minilib.zip
 include requirements.txt
-recursive-include *.py
+recursive-include blackbelt *.py
