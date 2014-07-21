@@ -38,20 +38,30 @@ def migrate_label_command(args):
     )
 
 
+def get_column(name, board_id=None):
+    api = get_api()
+
+    if not board_id:
+        board_id = config['trello']['work_board_id']
+
+    columns = api.boards.get_list(board_id)
+    column  = None
+
+    for col in columns:
+        if col['name'] == name:
+            column = col
+
+    if not column:
+        raise ValueError("Cannot find column %s" % name)
+
+    return column
+
 def get_current_working_ticket():
     api = get_api()
 
-    # board = api.boards.get(config['trello']['work_board_id'])
-    columns = api.boards.get_list(config['trello']['work_board_id'])
+    column = get_column(name=config['trello']['work_column_name'])
 
-    for column in columns:
-        if column['name'] == config['trello']['work_column_name']:
-            column_id = column['id']
-
-    if not column_id:
-        raise ValueError("Cannot find column %s" % config['trello']['work_column_name'])
-
-    cards = api.lists.get_card(column_id)
+    cards = api.lists.get_card(column['id'])
 
     me = api.tokens.get_member(config['trello']['access_token'])
 
@@ -76,6 +86,12 @@ def get_current_working_ticket():
         raise ValueError("No work card for me; aborting")
 
     return work_card
+
+
+def pause_ticket(ticket):
+    api = get_api()
+    column = get_column(name=config['trello']['pause_column_name'])
+    api.cards.update_idList(ticket['id'], column['id'])
 
 
 def migrate_label(label, board, board_to, column, column_to):

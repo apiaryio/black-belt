@@ -17,4 +17,5 @@ except OSError:
 
 config['trello']['work_board_id'] = '1KsoiV9e'
 config['trello']['work_column_name'] = 'Doing'
+config['trello']['pause_column_name'] = 'Paused/Waiting'
 
