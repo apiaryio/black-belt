@@ -1,10 +1,15 @@
 # Black Belt
 
-Black belt is collection of scripts, tools and guidelines used for open source project and release management. 
+Black belt is collection of scripts, tools and guidelines used for developing projects The Apiary Way.
 
 ## Installation
 
-`virtualenv` assumed (`sudo easy_install virtualenv`)
+`sudo pip install black-belt` or `sudo easy_install black-belt` if you are Mac OS X oldie.
+
+
+## Development (of black-belt)
+
+`virtualenv` assumed (`sudo pip virtualenv`)
 
 ```
 virtualenv venv
@@ -12,9 +17,29 @@ source venv/bin/activate
 python setup.py develop
 ```
 
-## Trello
+## Usage
 
-### Card migration
+First, set things up:
+
+`bb init`
+
+and follow instructions.
+
+### Github
+
+Handled by `bb gh` subcommand.
+
+#### Making a pull request
+
+`bb gh pr`
+
+* Detects your card in `Work Overview` (you are working only on one, right?)
+* Makes PR; it assumes you are in repo and on the branch you want to make PR for
+* Moves card to `Paused/Waiting` and attaches PR link. 
+
+### Trello
+
+###$ Card migration
 
 ```
 (venv)almad@arael:~/projects/black-belt$ bb t migrate-label --label="Product: Analytics" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
