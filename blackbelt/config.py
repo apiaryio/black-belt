@@ -1,0 +1,20 @@
+import json
+from os.path import expanduser
+
+
+try:
+	configFile = expanduser('~/.blackbelt')
+	with open(configFile) as f:
+		config = json.loads(f.read())		
+except OSError:
+	config = {
+		'trello': {},
+		'github': {}
+	}
+
+
+# default config, overwrite/modularize
+
+config['trello']['work_board_id'] = '1KsoiV9e'
+config['trello']['work_column_name'] = 'Doing'
+

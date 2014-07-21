@@ -1,6 +1,7 @@
 import os
 import sys
 
+from config import config
 from trello import TrelloApi
 
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
@@ -22,6 +23,10 @@ def dispatch_command(args):
 def get_token_url():
     return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
 
+def get_api():
+    api = TrelloApi(apikey=TRELLO_API_KEY)
+    api.set_token(config['trello']['access_token'])
+    return api
 
 def migrate_label_command(args):
     migrate_label(
@@ -33,10 +38,48 @@ def migrate_label_command(args):
     )
 
 
-def migrate_label(label, board, board_to, column, column_to):
-    api = TrelloApi(apikey=os.environ['TRELLO_API_KEY'])
+def get_current_working_ticket():
+    api = get_api()
 
-    api.set_token(os.environ['TRELLO_OAUTH_TOKEN'])
+    # board = api.boards.get(config['trello']['work_board_id'])
+    columns = api.boards.get_list(config['trello']['work_board_id'])
+
+    for column in columns:
+        if column['name'] == config['trello']['work_column_name']:
+            column_id = column['id']
+
+    if not column_id:
+        raise ValueError("Cannot find column %s" % config['trello']['work_column_name'])
+
+    cards = api.lists.get_card(column_id)
+
+    me = api.tokens.get_member(config['trello']['access_token'])
+
+    myCards = [card for card in cards if me['id'] in card['idMembers']]
+    work_card = None
+
+    if len(myCards) < 1:
+        raise ValueError("No working card; aborting.")
+
+    if len(myCards) == 1:
+        workCard = myCards[0]
+
+    if len(myCards) > 1:
+        for card in myCards:
+            if len(card['idMembers']) == 1:
+                if not work_card:
+                    work_card = card
+                else:
+                    raise ValueError("Multiple work cards; cannot decide, aborting")
+
+    if not work_card:
+        raise ValueError("No work card for me; aborting")
+
+    return work_card
+
+
+def migrate_label(label, board, board_to, column, column_to):
+    api = get_api()
 
     if column:
         raise ValueError("column is now ignored, you need to program support for it")

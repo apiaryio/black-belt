@@ -4,12 +4,13 @@ import sys
 
 from github import Github
 
-from handle_trello import get_my_work_card
+from config import config
+from handle_trello import get_current_working_ticket
 
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
 def dispatch_command(args):
-    if 'GITHUB_OAUTH_TOKEN' not in os.environ:
+    if 'GITHUB_OAUTH_TOKEN' not in os.environ and 'access_token' not in config['github']:
         print "You have to set up GITHUB_OAUTH_TOKEN"
 #        print "Please visit this URL to get it: %s" % api.get_token_url("black-belt")
         sys.exit(1)
@@ -25,6 +26,12 @@ def pr_command(args):
 
 
 def pull_request():
+    branch = get_current_branch()
+
+    ticket = get_current_working_ticket()
+
+    print(ticket)
+
 
 
 def get_current_branch():

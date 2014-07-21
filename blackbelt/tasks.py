@@ -1,6 +1,7 @@
 import argparse
 
 import handle_init
+import handle_github
 import handle_trello
 
 def trello_arguments(parent_parser, subparser):
@@ -21,7 +22,7 @@ def github_arguments(parent_parser, subparser):
     github_parser = subparser.add_parser("gh", help="Github",
                     parents=[parent_parser])
     
-    action_subparser = trello_parser.add_subparsers(title="action",                                                                                         
+    action_subparser = github_parser.add_subparsers(title="action",                                                                                         
                      dest="action_command")                                                                                                               
 
     migrate_parser = action_subparser.add_parser("pr", help="Send pull request from currnent branch",
