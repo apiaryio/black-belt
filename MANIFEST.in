@@ -1,0 +1,7 @@
+include README.md
+include pavement.py
+include setup.py
+include LICENSE
+include paver-minilib.zip
+include requirements.txt
+recursive-include *.py

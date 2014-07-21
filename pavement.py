@@ -15,8 +15,7 @@ setup(
     url='http://github.com/apiaryio/black-belt',
     license='MIT',
     packages=['blackbelt'],
-    data_files=['setup.py', 'pavement.py', 'paver-minilib.zip'],
-    tests_require=['nose', 'virtualenv', 'mock', 'cogapp'],
+    tests_require=['nose', 'virtualenv'],
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
