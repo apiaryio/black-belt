@@ -3,7 +3,7 @@ from paver.setuputils import setup
 
 options = environment.options
 
-VERSION = '0.4.3'
+VERSION = '0.4.4'
 
 setup(
     name='blackbelt',
@@ -35,6 +35,7 @@ setup(
 if paver.setuputils.has_setuptools:
     old_sdist = "setuptools.command.sdist"
     options.setup.update(dict(
+        requires=['requests', 'trello', 'PyGithub'],
         test_suite='nose.collector',
         zip_safe=False,
         entry_points="""
