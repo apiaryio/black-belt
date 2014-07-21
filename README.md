@@ -4,10 +4,10 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 
 ## Installation
 
-`sudo pip install black-belt` or `sudo easy_install black-belt` if you are Mac OS X oldie.
+`sudo pip install blackbelt` or `sudo easy_install blackbelt` if you are Mac OS X oldie.
 
 
-## Development (of black-belt)
+## Development (of black belt)
 
 `virtualenv` assumed (`sudo pip virtualenv`)
 
