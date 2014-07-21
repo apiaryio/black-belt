@@ -6,6 +6,9 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 
 `sudo pip install blackbelt` or `sudo easy_install blackbelt` if you are Mac OS X oldie.
 
+Note: dependency resolution is strange. You might also need to do
+
+`sudo easy_install trello PyGithub`
 
 ## Development (of black belt)
 
