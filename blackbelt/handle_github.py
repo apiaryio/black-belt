@@ -5,9 +5,10 @@ import sys
 from github import Github
 import json
 import requests
+import webbrowser
 
 from config import config
-from handle_trello import get_current_working_ticket, pause_ticket
+from handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
 
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
@@ -42,7 +43,7 @@ def pull_request():
 
     pr_description = """
 
-    Pull request for [%(name)s](%(url)s).
+Pull request for [%(name)s](%(url)s).
 
     """ % ticket
 
@@ -69,6 +70,20 @@ def pull_request():
         raise ValueError("PR ended with status code %s: %s" % (r.status_code, r))
 
     pause_ticket(ticket)
+
+    pr_info = r.json()
+
+    ticket_comment = "Sending [pull request #%(number)s](%(url)s)" % pr_info
+
+    comment_ticket(ticket, ticket_comment)
+
+    print "Pull request %(pr_id)s for trello card %(ticket_id)s send!" % {
+        'pr_id': pr_info['number'],
+        'ticket_id': ticket['id']
+    }
+
+    webbrowser.open(pr_info['html_url'])
+
 
 
 def get_current_branch():

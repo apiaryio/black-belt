@@ -93,6 +93,11 @@ def pause_ticket(ticket):
     column = get_column(name=config['trello']['pause_column_name'])
     api.cards.update_idList(ticket['id'], column['id'])
 
+def comment_ticket(ticket, comment):
+    api = get_api()
+    api.cards.new_action_comment(ticket['id'], comment)
+
+
 
 def migrate_label(label, board, board_to, column, column_to):
     api = get_api()
