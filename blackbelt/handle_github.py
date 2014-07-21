@@ -63,7 +63,7 @@ Pull request for [%(name)s](%(url)s).
     payload = {
         'title': ticket['name'],
         'base': 'master',
-        'head': "%(owner)s:%(branch)s" % {'branch': branch, 'owner': repo_info['owner']),
+        'head': "%(owner)s:%(branch)s" % {'branch': branch, 'owner': repo_info['owner']},
         'body': pr_description
     }
 
