@@ -2,7 +2,7 @@ import os
 
 import click
 
-@click.group()
+@click.group(help='Handle Trello-related actions and integrations.')
 def cli():
     pass
 
