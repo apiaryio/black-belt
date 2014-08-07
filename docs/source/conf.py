@@ -243,7 +243,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'BlackBelt', u'Black Belt Documentation',
-   u'Apiary', 'BlackBelt', 'One line description of project.',
+   u'Apiary', 'BlackBelt', 'Project automation the Apiary way.',
    'Miscellaneous'),
 ]
 
