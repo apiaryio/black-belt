@@ -18,7 +18,7 @@ def get_github_repo():
 
 def get_remote_repo_info(github_repo_info):
     # 'git@github.com:apiaryio/apiary.git'
-    match = re.match("^.*github.com\:(?P<owner>[a-z]+)\/{1}(?P<name>[a-z]+)\.git$", github_repo_info)
+    match = re.match("^.*github.com\:(?P<owner>[a-zA-Z\_\-]+)\/{1}(?P<name>[a-zA-Z\-\_]+)\.git$", github_repo_info)
     if not match:
         raise ValueError("Cannot parse repo info. Bad remote?")
     return match.groupdict()

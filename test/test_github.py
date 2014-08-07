@@ -4,7 +4,7 @@ from blackbelt.handle_github import get_remote_repo_info
 
 class TestGithubParsing(object):
 
-	github_repo = 'git@github.com:apiaryio/apiary.git'
+	github_repo = 'git@github.com:apiaryio/apiary-test.git'
 
 	def setUp(self):
 		self.parsed = get_remote_repo_info(self.github_repo)
@@ -13,4 +13,4 @@ class TestGithubParsing(object):
 		assert_equals('apiaryio', self.parsed['owner'])
 
 	def test_repo_name(self):
-		assert_equals('apiary', self.parsed['name'])
+		assert_equals('apiary-test', self.parsed['name'])
