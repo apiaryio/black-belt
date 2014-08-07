@@ -8,7 +8,7 @@ Terms used in this documentation.
 .. glossary::
 
 	Story Owner
-    	Person responsible for a specific user story that's going to be developed.
+		Person responsible for a specific user story that's going to be developed.
 
 	Developer
 		Person transmuting a wish into the code that's running in production. 
