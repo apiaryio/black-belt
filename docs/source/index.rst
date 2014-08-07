@@ -1,4 +1,5 @@
 
+======================================
 Project automation the Apiary way
 ======================================
 
@@ -28,11 +29,11 @@ Structure
 This documents focus more on intended workflow from the perspective of two roles (those may be the same person, of course): Developer and Story Owner.
 
 
-
-Contents:
-
 .. toctree::
    :maxdepth: 2
+
+   story-owner
+   glossary
 
 
 
