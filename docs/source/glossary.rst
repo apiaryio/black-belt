@@ -16,5 +16,6 @@ Terms used in this documentation.
 	Product Board
 		Trello board with User Story cards. 
 
+	Work Board
 	Work Overview
 		Trello board with deployeable tasks/units derived from User Story cards.
