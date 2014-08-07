@@ -6,20 +6,6 @@ from trello import TrelloApi
 
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
-def dispatch_command(args):
-    if 'TRELLO_API_KEY' not in os.environ:
-        raise ValueError('TRELLO_API_KEY environment variable must be set')
-
-    if 'TRELLO_OAUTH_TOKEN' not in os.environ:
-        print "You have to set up TRELLO_OAUTH_TOKEN"
-        print "Please visit this URL to get it: %s" % api.get_token_url("black-belt")
-        sys.exit(1)
-
-
-    if args.action_command in ACTION_COMMAND_MAP:
-        ACTION_COMMAND_MAP[args.action_command](args)
-
-
 def get_token_url():
     return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
 
@@ -27,15 +13,6 @@ def get_api():
     api = TrelloApi(apikey=TRELLO_API_KEY)
     api.set_token(config['trello']['access_token'])
     return api
-
-def migrate_label_command(args):
-    migrate_label(
-        label     = args.label,
-        board     = args.board,
-        board_to  = args.board_to,
-        column    = args.column,
-        column_to = args.column_to
-    )
 
 
 def get_column(name, board_id=None):
@@ -160,6 +137,3 @@ def migrate_card(api, card, target_column):
     api.cards.update_idList(card['id'], target_column['id'])
 
 
-ACTION_COMMAND_MAP = {
-    'migrate-label': migrate_label_command
-}

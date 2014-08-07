@@ -35,7 +35,7 @@ setup(
 if paver.setuputils.has_setuptools:
     old_sdist = "setuptools.command.sdist"
     options.setup.update(dict(
-        requires=['requests', 'trello', 'PyGithub'],
+        requires=['click', 'requests', 'trello', 'PyGithub'],
         test_suite='nose.collector',
         zip_safe=False,
         entry_points="""
