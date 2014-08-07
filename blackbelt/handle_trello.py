@@ -42,17 +42,17 @@ def get_current_working_ticket():
 
     me = api.tokens.get_member(config['trello']['access_token'])
 
-    myCards = [card for card in cards if me['id'] in card['idMembers']]
+    my_cards = [card for card in cards if me['id'] in card['idMembers']]
     work_card = None
 
-    if len(myCards) < 1:
+    if len(my_cards) < 1:
         raise ValueError("No working card; aborting.")
 
-    if len(myCards) == 1:
-        workCard = myCards[0]
+    if len(my_cards) == 1:
+        work_card = my_cards[0]
 
-    if len(myCards) > 1:
-        for card in myCards:
+    if len(my_cards) > 1:
+        for card in my_cards:
             if len(card['idMembers']) == 1:
                 if not work_card:
                     work_card = card
