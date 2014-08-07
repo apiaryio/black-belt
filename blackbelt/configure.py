@@ -4,7 +4,7 @@ import webbrowser
 
 import handle_trello
 
-def dispatch_command(args):
+def configure_blackbelt():
 	print("Going to collect all the tokens and storem them in ~/.blackbelt")
 	print('*** Trello ***')
 	print("Please get yourself a token: visit %s" % handle_trello.get_token_url())
