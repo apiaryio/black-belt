@@ -15,9 +15,11 @@ Product list to Work Cards
 
 :term:`Story Owner` first breaks down the story cards into chunks by putting the list into the :term:`Story`. After this is somehow done and run through with :term:`Developer`, one usually wants to "transer" it to :term:`Work Board` so it can be developed.
 
+.. TODO: bb t schedule-list [--label="Product: Example"] [--work-board="abcdef"] --story-card="defABC" --dev="user-id" [--list="xoxo"]
+
 To help with this task, one can use this command::
 
-	bb t schedule-list [--label="Product: Example"] [--work-board="abcdef"] --story-card="defABC" --dev="user-id" [--list="xoxo"]
+	bb t schedule-list --story-card="defABC" --dev="user-id" [--list-id="123"]
 
 
 

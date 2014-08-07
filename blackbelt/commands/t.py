@@ -2,6 +2,9 @@ import os
 
 import click
 
+from blackbelt.handle_trello import migrate_label as ml, schedule_list as sl
+
+
 @click.group(help='Handle Trello-related actions and integrations.')
 def cli():
     pass
@@ -14,6 +17,13 @@ def cli():
 @click.option('--column', help='Column to migrate from')
 @click.option('--column-to', help='Column to migrate to')
 def migrate_label(*args, **kwargs):
-	from blackbelt.handle_trello import migrate_label as ml
 	ml(**kwargs)
+
+
+
+@cli.command(name='schedule-list')
+@click.option('--story-card', help='Story Card ID or shortlink')
+@click.option('--story-list', help='Name of the list that should be converted to cards')
+def schedule_list(**kwargs):
+	sl(**kwargs)
 

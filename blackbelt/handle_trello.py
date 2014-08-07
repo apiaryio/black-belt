@@ -1,10 +1,26 @@
+import json
 import os
+import re
 import sys
+import urllib
+
+import requests
 
 from config import config
 from trello import TrelloApi
 
+__all__ = ("schedule_list", "migrate_label", "schedule_list")
+
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
+
+STORY_CARD_TODO_LIST_NAMES = (
+    "To Do",
+    "ToDo",
+    "Engineering ToDo"
+)
+
+TODO_QUEUE_NAME = "To Do Queue"
+
 
 def get_token_url():
     return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
@@ -137,3 +153,68 @@ def migrate_card(api, card, target_column):
     api.cards.update_idList(card['id'], target_column['id'])
 
 
+def schedule_list(story_card, story_list=None, owner=None):
+    """
+    Looks for Story Card, finds a list and migrate all non-card items to card,
+    replacing the items with links to them.
+
+    Work cards contain "Part of <parent-card-link>".
+    """
+
+    api = get_api()
+
+    match = re.match("^https\:\/\/trello\.com\/c\/(?P<id>\w+)$", story_card)
+    if match:
+        story_card = match.groupdict()['id']
+
+    story_card = api.cards.get(urllib.quote(story_card))
+    card_list = api.cards.get_checklist(story_card['id'])
+
+    todo_list = None
+
+    for item in card_list:
+        if story_card:
+            if item['name'] == story_list or item['id'] == story_list:
+                todo_list = item
+                break
+        else:
+            for name in STORY_CARD_TODO_LIST_NAMES:
+                if item['name'] == name:
+                    todo_list = item
+                    break
+
+    if not todo_list:
+        lists = ', '.join([i['name'] for i in card_list])
+        raise ValueError("Cannot find checklist to convert. Please provide a correct --story-list parameter. Available lists are: %s" % lists)
+
+    list_items = api.checklists.get_checkItem(todo_list['id'])
+
+        
+    if not owner:
+        owner = api.tokens.get_member(config['trello']['access_token'])
+    else:
+        owner = api.members.get(owner)
+
+
+    work_queue = get_column(TODO_QUEUE_NAME)    
+
+    conversion_items = [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')]
+
+    def update(checklist_id, name=None):
+        resp = requests.put("https://trello.com/1/checklists/%s" % (checklist_id), params=dict(key=api._apikey, token=api._token), data=dict(name=name))
+        resp.raise_for_status()
+        return json.loads(resp.content)
+
+    def create_item(checklist_id, name, pos):
+        resp = requests.post("https://trello.com/1/checklists/%s/checkItems" % (checklist_id), params=dict(key=api._apikey, token=api._token), data=dict(name=name, pos=pos))
+        resp.raise_for_status()
+        return json.loads(resp.content)
+
+
+    for item in conversion_items:
+        desc = "Part of %(url)s" % story_card
+        card = api.cards.new(name=item['name'], desc=desc, idList=work_queue['id'])
+        api.cards.new_member(card['id'], owner['id'])
+
+        create_item(checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
+        api.checklists.delete_checkItem_idCheckItem(idCheckItem=item['id'], checklist_id=todo_list['id'])
