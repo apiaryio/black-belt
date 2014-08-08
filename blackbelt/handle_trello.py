@@ -146,7 +146,8 @@ def migrate_card(api, card, target_column):
     api.cards.update_idList(card['id'], target_column['id'])
 
 
-def get_conversion_items(api, card_list, story_card):
+def get_conversion_items(api, card_list, story_card, story_list):
+    """ Return (todo_list, items_to_convert_from_there) """
     todo_list = None
 
     for item in card_list:
@@ -165,7 +166,7 @@ def get_conversion_items(api, card_list, story_card):
         raise ValueError("Cannot find checklist to convert. Please provide a correct --story-list parameter. Available lists are: %s" % lists)
 
     list_items = api.checklists.get_checkItem(todo_list['id'])
-    return [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')]
+    return (todo_list, [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')])
 
 
 def schedule_list(story_card, story_list=None, owner=None):
@@ -194,7 +195,7 @@ def schedule_list(story_card, story_list=None, owner=None):
 
     work_queue = get_column(TODO_QUEUE_NAME)    
 
-    conversion_items = get_conversion_items(api, card_list, story_card)
+    todo_list, conversion_items = get_conversion_items(api, card_list, story_card, story_list)
 
     for item in conversion_items:
         desc = "Part of %(url)s" % story_card
