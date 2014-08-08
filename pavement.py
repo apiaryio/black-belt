@@ -24,11 +24,12 @@ setup(
     tests_require=['nose', 'virtualenv'],
     test_suite='nose.collector',
     zip_safe=False,
-    entry_points={
-        'console_scripts': [
-            'bb = blackbelt.tasks:main'
-        ]
-    },
+    scripts=['distutils_scripts/bb'],
+    # entry_points={
+    #     'console_scripts': [
+    #         'bb = blackbelt.tasks:main'
+    #     ]
+    # },
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
