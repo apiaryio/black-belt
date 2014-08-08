@@ -3,12 +3,14 @@ from paver.setuputils import setup
 
 options = environment.options
 
-requires = ['click', 'requests', 'trello', 'PyGithub']
-
 from blackbelt.version import VERSION
 
+NAME = 'blackbelt'
+requires = ['click', 'requests', 'trello', 'PyGithub']
+
+
 setup(
-    name='blackbelt',
+    name=NAME,
     version=VERSION,
     description='Project automation the Apiary way',
     long_description="""Internal so far""",
@@ -16,7 +18,7 @@ setup(
     author_email='lukas@apiary.io',
     url='http://github.com/apiaryio/black-belt',
     license='MIT',
-    packages=['blackbelt', 'blackbelt.apis', 'blackbelt.commands'],
+    packages=[NAME, NAME+'.apis', NAME+'.commands'],
     install_requires=requires,
     tests_require=['nose', 'virtualenv'],
     classifiers=[
@@ -56,8 +58,7 @@ options.setup.package_data = paver.setuputils.find_package_data("blackbelt", pac
 @task
 @consume_args
 def bump(args):
-    import blackbelt.version
-    version = map(int, blackbelt.version.VERSION.split('.')[0:3])
+    version = map(int, VERSION.split('.')[0:3])
 
     if len(args) > 0 and args[0] == 'major':
         version[1] += 1
@@ -85,3 +86,10 @@ def bump(args):
 
     with open(path('docs/source/conf.py'), 'w') as f:
         f.writelines(conf)
+
+
+@task
+def release():
+    sh("git tag -s '%(name)s-%(version)s' -m 'Version bump to %(version)s'" % {'name': NAME, 'version': VERSION})
+    sh("git push --tags")
+    sh("python setup.py register sdist upload")
