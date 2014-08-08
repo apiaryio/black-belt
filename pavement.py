@@ -3,7 +3,9 @@ from paver.setuputils import setup
 
 options = environment.options
 
-VERSION = '0.5.0'
+VERSION = '0.5.1'
+
+requirs = ['click', 'requests', 'trello', 'PyGithub']
 
 setup(
     name='blackbelt',
@@ -14,8 +16,8 @@ setup(
     author_email='lukas@apiary.io',
     url='http://github.com/apiaryio/black-belt',
     license='MIT',
-    packages=['blackbelt'],
-    requires=['requests', 'trello', 'PyGithub'],
+    packages=['blackbelt', 'blackbelt.apis', 'blackbelt.commands'],
+    requires=requires,
     tests_require=['nose', 'virtualenv'],
     classifiers=[
         "Intended Audience :: Developers",
@@ -35,7 +37,7 @@ setup(
 if paver.setuputils.has_setuptools:
     old_sdist = "setuptools.command.sdist"
     options.setup.update(dict(
-        requires=['click', 'requests', 'trello', 'PyGithub'],
+        requires=requires,
         test_suite='nose.collector',
         zip_safe=False,
         entry_points="""
