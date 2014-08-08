@@ -96,3 +96,4 @@ def release():
     sh("git tag -s '%(name)s-%(version)s' -m 'Version bump to %(version)s'" % {'name': NAME, 'version': VERSION})
     sh("git push --tags")
     sh("python setup.py register sdist upload")
+    sh("python setup.py bdist_wheel upload")
