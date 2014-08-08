@@ -14,11 +14,11 @@ __all__ = ("schedule_list", "migrate_label", "schedule_list")
 
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
-STORY_CARD_TODO_LIST_NAMES = (
+STORY_CARD_TODO_LIST_NAMES = [
     "To Do",
     "ToDo",
     "Engineering ToDo"
-)
+]
 
 TODO_QUEUE_NAME = "To Do Queue"
 
@@ -151,13 +151,13 @@ def get_conversion_items(api, card_list, story_card, story_list):
     todo_list = None
 
     for item in card_list:
-        if story_card:
+        if story_list:
             if item['name'] == story_list or item['id'] == story_list:
                 todo_list = item
                 break
         else:
             for name in STORY_CARD_TODO_LIST_NAMES:
-                if item['name'] == name:
+                if item['name'].lower().strip() == name.strip().lower():
                     todo_list = item
                     break
 
