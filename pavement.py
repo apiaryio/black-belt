@@ -20,6 +20,7 @@ setup(
     license='MIT',
     packages=[NAME, NAME+'.apis', NAME+'.commands'],
     install_requires=requires,
+    requires=requires,
     tests_require=['nose', 'virtualenv'],
     classifiers=[
         "Intended Audience :: Developers",
@@ -40,6 +41,7 @@ if paver.setuputils.has_setuptools:
     old_sdist = "setuptools.command.sdist"
     options.setup.update(dict(
         install_requires=requires,
+        requires=requires,
         test_suite='nose.collector',
         zip_safe=False,
         entry_points="""
