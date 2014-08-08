@@ -24,6 +24,12 @@ setup(
     tests_require=['nose', 'virtualenv'],
     test_suite='nose.collector',
     zip_safe=False,
+    # Yes, entry_points are nice and shiny and should be used in 21st century
+    # Unfortunately, having some dependencies, the load_entry_point in the ge-
+    # nerated console script blows up with pkg_resources.DistributionNotFound: requests
+    # if it was installed with pip. 
+    # Pradoxically, solution is to easy_install -U all the dependencies.
+    # Therefore, just fall back to the good, old, simple disutils script that works.
     scripts=['distutils_scripts/bb'],
     # entry_points={
     #     'console_scripts': [
