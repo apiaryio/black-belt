@@ -10,7 +10,7 @@ This is an internal tool for supporting development workflow inside `Apiary <htt
 Installation
 --------------
 
-``pip install black-belt`` if you can, ``easy_install black-belt`` if you must (Mac OS X default).
+``pip install blackbelt`` if you can, ``easy_install blackbelt`` if you must (Mac OS X default).
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
