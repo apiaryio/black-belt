@@ -3,7 +3,7 @@ from paver.setuputils import setup
 
 options = environment.options
 
-VERSION = '0.5.2'
+VERSION = '0.5.3'
 
 requires = ['click', 'requests', 'trello', 'PyGithub']
 
