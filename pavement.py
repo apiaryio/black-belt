@@ -44,10 +44,11 @@ if paver.setuputils.has_setuptools:
         requires=requires,
         test_suite='nose.collector',
         zip_safe=False,
-        entry_points="""
-[console_scripts]
-bb = blackbelt.tasks:main
-"""
+        entry_points={
+            'console_scripts': [
+                'bb = blackbelt.tasks:main'
+            ]
+        }
     ))
 else:
     old_sdist = "distutils.command.sdist"
