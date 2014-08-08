@@ -4,11 +4,11 @@ import re
 import sys
 import urllib
 
+from trello import TrelloApi
 import requests
 
 from blackbelt.apis.trello import *
 from blackbelt.config import config
-from blackbelt.trello import TrelloApi
 
 __all__ = ("schedule_list", "migrate_label", "schedule_list")
 
@@ -146,23 +146,7 @@ def migrate_card(api, card, target_column):
     api.cards.update_idList(card['id'], target_column['id'])
 
 
-def schedule_list(story_card, story_list=None, owner=None):
-    """
-    Looks for Story Card, finds a list and migrate all non-card items to card,
-    replacing the items with links to them.
-
-    Work cards contain "Part of <parent-card-link>".
-    """
-
-    api = get_api()
-
-    match = re.match("^https\:\/\/trello\.com\/c\/(?P<id>\w+)$", story_card)
-    if match:
-        story_card = match.groupdict()['id']
-
-    story_card = api.cards.get(urllib.quote(story_card))
-    card_list = api.cards.get_checklist(story_card['id'])
-
+def get_conversion_items(api, card_list, story_card):
     todo_list = None
 
     for item in card_list:
@@ -181,8 +165,27 @@ def schedule_list(story_card, story_list=None, owner=None):
         raise ValueError("Cannot find checklist to convert. Please provide a correct --story-list parameter. Available lists are: %s" % lists)
 
     list_items = api.checklists.get_checkItem(todo_list['id'])
+    return [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')]
 
-        
+
+def schedule_list(story_card, story_list=None, owner=None):
+    """
+    Looks for Story Card, finds a list and migrate all non-card items to card,
+    replacing the items with links to them.
+
+    Work cards contain "Part of <parent-card-link>".
+    """
+
+    api = get_api()
+
+    match = re.match("^https\:\/\/trello\.com\/c\/(?P<id>\w+)$", story_card)
+    if match:
+        story_card = match.groupdict()['id']
+
+    story_card = api.cards.get(urllib.quote(story_card))
+    card_list = api.cards.get_checklist(story_card['id'])
+
+
     if not owner:
         owner = api.tokens.get_member(config['trello']['access_token'])
     else:
@@ -191,7 +194,7 @@ def schedule_list(story_card, story_list=None, owner=None):
 
     work_queue = get_column(TODO_QUEUE_NAME)    
 
-    conversion_items = [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')]
+    conversion_items = get_conversion_items(api, card_list, story_card)
 
     for item in conversion_items:
         desc = "Part of %(url)s" % story_card
@@ -200,3 +203,5 @@ def schedule_list(story_card, story_list=None, owner=None):
 
         create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
         api.checklists.delete_checkItem_idCheckItem(idCheckItem=item['id'], checklist_id=todo_list['id'])
+
+    print "Done"
