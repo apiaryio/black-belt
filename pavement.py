@@ -3,9 +3,9 @@ from paver.setuputils import setup
 
 options = environment.options
 
-VERSION = '0.5.3'
-
 requires = ['click', 'requests', 'trello', 'PyGithub']
+
+from blackbelt.version import VERSION
 
 setup(
     name='blackbelt',
@@ -51,3 +51,37 @@ else:
 
 options.setup.package_data = paver.setuputils.find_package_data("blackbelt", package="blackbelt",
                                                 only_in_packages=False)
+
+
+@task
+@consume_args
+def bump(args):
+    import blackbelt.version
+    version = map(int, blackbelt.version.VERSION.split('.')[0:3])
+
+    if len(args) > 0 and args[0] == 'major':
+        version[1] += 1
+    else:
+        version[2] += 1
+
+    version = map(str, version)
+
+    module_content = "VERSION='%s'\n" % '.'.join(version)
+
+    # bump version in blackbelt
+    with open(path('blackbelt/version.py'), 'w') as f:
+        f.write(module_content)
+
+    # bump version in sphinx
+    conf = []
+    with open(path('docs/source/conf.py'), 'r') as f:
+        for line in f.readlines():
+            if line.startswith('version = '):
+                line = "version = '%s'\n" % '.'.join(version[0:2])
+            elif line.startswith('release = '):
+                line = "release = '%s'\n" % '.'.join(version[0:3])
+
+            conf.append(line)
+
+    with open(path('docs/source/conf.py'), 'w') as f:
+        f.writelines(conf)
