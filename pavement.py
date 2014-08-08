@@ -81,6 +81,7 @@ def bump(args):
     with open(path('docs/source/conf.py'), 'w') as f:
         f.writelines(conf)
 
+    sh("git commit blackbelt/version.py docs/source/conf.py -m 'Version bump to %s'" % '.'.join(version))
 
 @task
 def release():
