@@ -20,8 +20,15 @@ setup(
     license='MIT',
     packages=[NAME, NAME+'.apis', NAME+'.commands'],
     install_requires=requires,
-    requires=requires,
+    # requires=requires,
     tests_require=['nose', 'virtualenv'],
+    test_suite='nose.collector',
+    zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'bb = blackbelt.tasks:main'
+        ]
+    },
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
@@ -36,23 +43,6 @@ setup(
         "Topic :: Software Development :: Build Tools",
     ]
 )
-
-if paver.setuputils.has_setuptools:
-    old_sdist = "setuptools.command.sdist"
-    options.setup.update(dict(
-        install_requires=requires,
-        requires=requires,
-        test_suite='nose.collector',
-        zip_safe=False,
-        entry_points={
-            'console_scripts': [
-                'bb = blackbelt.tasks:main'
-            ]
-        }
-    ))
-else:
-    old_sdist = "distutils.command.sdist"
-    options.setup.scripts = ['distutils_scripts/bb']
 
 options.setup.package_data = paver.setuputils.find_package_data("blackbelt", package="blackbelt",
                                                 only_in_packages=False)
