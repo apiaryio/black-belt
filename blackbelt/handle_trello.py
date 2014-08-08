@@ -6,8 +6,9 @@ import urllib
 
 import requests
 
-from config import config
-from trello import TrelloApi
+from blackbelt.apis.trello import *
+from blackbelt.config import config
+from blackbelt.trello import TrelloApi
 
 __all__ = ("schedule_list", "migrate_label", "schedule_list")
 
@@ -141,15 +142,7 @@ def migrate_label(label, board, board_to, column, column_to):
 def migrate_card(api, card, target_column):
     print("Moving card %(id)s: %(name)s" % card)
 
-    # One would to update_idBoard...IF THEY WOULD'N FORGET TO GENERATE IT :-|
-    def update_idBoard(card_id, value):
-        import json
-        import requests
-        resp = requests.put("https://trello.com/1/cards/%s/idBoard" % (card_id), params=dict(key=api._apikey, token=api._token), data=dict(value=value))
-        resp.raise_for_status()
-        return json.loads(resp.content)
-
-    update_idBoard(card['id'], target_column['idBoard'])
+    move_to_board(api, card['id'], target_column['idBoard'])
     api.cards.update_idList(card['id'], target_column['id'])
 
 
@@ -200,21 +193,10 @@ def schedule_list(story_card, story_list=None, owner=None):
 
     conversion_items = [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')]
 
-    def update(checklist_id, name=None):
-        resp = requests.put("https://trello.com/1/checklists/%s" % (checklist_id), params=dict(key=api._apikey, token=api._token), data=dict(name=name))
-        resp.raise_for_status()
-        return json.loads(resp.content)
-
-    def create_item(checklist_id, name, pos):
-        resp = requests.post("https://trello.com/1/checklists/%s/checkItems" % (checklist_id), params=dict(key=api._apikey, token=api._token), data=dict(name=name, pos=pos))
-        resp.raise_for_status()
-        return json.loads(resp.content)
-
-
     for item in conversion_items:
         desc = "Part of %(url)s" % story_card
         card = api.cards.new(name=item['name'], desc=desc, idList=work_queue['id'])
         api.cards.new_member(card['id'], owner['id'])
 
-        create_item(checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
+        create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
         api.checklists.delete_checkItem_idCheckItem(idCheckItem=item['id'], checklist_id=todo_list['id'])
