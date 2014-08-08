@@ -5,7 +5,7 @@ options = environment.options
 
 VERSION = '0.5.1'
 
-requirs = ['click', 'requests', 'trello', 'PyGithub']
+requires = ['click', 'requests', 'trello', 'PyGithub']
 
 setup(
     name='blackbelt',
