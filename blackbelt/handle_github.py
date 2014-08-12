@@ -71,9 +71,9 @@ Pull request for [%(name)s](%(url)s).
 
     comment_ticket(ticket, ticket_comment)
 
-    print "Pull request %(pr_id)s for trello card %(ticket_id)s send!" % {
+    print "Pull request %(pr_id)s for trello card %(ticket_url)s send!" % {
         'pr_id': pr_info['number'],
-        'ticket_id': ticket['id']
+        'ticket_url': ticket['url']
     }
 
     webbrowser.open(pr_info['html_url'])
