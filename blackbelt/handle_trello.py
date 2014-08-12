@@ -169,7 +169,7 @@ def get_conversion_items(api, card_list, story_card, story_list):
     return (todo_list, [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')])
 
 
-def schedule_list(story_card, story_list=None, owner=None):
+def schedule_list(story_card, story_list=None, owner=None, label=None):
     """
     Looks for Story Card, finds a list and migrate all non-card items to card,
     replacing the items with links to them.
@@ -200,9 +200,12 @@ def schedule_list(story_card, story_list=None, owner=None):
     for item in conversion_items:
         desc = "Part of %(url)s" % story_card
         card = api.cards.new(name=item['name'], desc=desc, idList=work_queue['id'])
-        api.cards.new_member(card['id'], owner['id'])
 
         create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
         api.checklists.delete_checkItem_idCheckItem(idCheckItem=item['id'], checklist_id=todo_list['id'])
+
+        api.cards.new_member(card['id'], owner['id'])
+        if label:
+            api.cards.new_label(card['id'], label)
 
     print "Done"
