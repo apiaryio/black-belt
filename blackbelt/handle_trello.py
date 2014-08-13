@@ -26,6 +26,7 @@ TODO_QUEUE_NAME = "To Do Queue"
 def get_token_url():
     return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
 
+
 def get_api():
     api = TrelloApi(apikey=TRELLO_API_KEY)
     api.set_token(config['trello']['access_token'])
@@ -39,7 +40,7 @@ def get_column(name, board_id=None):
         board_id = config['trello']['work_board_id']
 
     columns = api.boards.get_list(board_id)
-    column  = None
+    column = None
 
     for col in columns:
         if col['name'] == name:
@@ -49,6 +50,7 @@ def get_column(name, board_id=None):
         raise ValueError("Cannot find column %s" % name)
 
     return column
+
 
 def get_current_working_ticket():
     api = get_api()
@@ -87,10 +89,10 @@ def pause_ticket(ticket):
     column = get_column(name=config['trello']['pause_column_name'])
     api.cards.update_idList(ticket['id'], column['id'])
 
+
 def comment_ticket(ticket, comment):
     api = get_api()
     api.cards.new_action_comment(ticket['id'], comment)
-
 
 
 def migrate_label(label, board, board_to, column, column_to):
@@ -122,7 +124,6 @@ def migrate_label(label, board, board_to, column, column_to):
             if l['color'] == final_label:
                 filtered_cards.append(c)
 
-
     board_to_info = api.boards.get(board_to)
     board_to_columns = api.boards.get_list(board_to_info['id'])
 
@@ -138,6 +139,7 @@ def migrate_label(label, board, board_to, column, column_to):
 
     for card in filtered_cards:
         migrate_card(api, card, target_column)
+
 
 def migrate_card(api, card, target_column):
     print("Moving card %(id)s: %(name)s" % card)
@@ -192,8 +194,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
     else:
         owner = api.members.get(owner)
 
-
-    work_queue = get_column(TODO_QUEUE_NAME)    
+    work_queue = get_column(TODO_QUEUE_NAME)
 
     todo_list, conversion_items = get_conversion_items(api, card_list, story_card, story_list)
 

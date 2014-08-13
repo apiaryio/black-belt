@@ -8,7 +8,6 @@ VERSION = '0.5.11'
 
 requires = ['click', 'requests', 'trello', 'PyGithub']
 
-
 setup(
     name=NAME,
     version=VERSION,
@@ -18,7 +17,7 @@ setup(
     author_email='lukas@apiary.io',
     url='http://github.com/apiaryio/black-belt',
     license='MIT',
-    packages=[NAME, NAME+'.apis', NAME+'.commands'],
+    packages=[NAME, NAME + '.apis', NAME + '.commands'],
     install_requires=requires,
     # requires=requires,
     tests_require=['nose', 'virtualenv'],
@@ -27,7 +26,7 @@ setup(
     # Yes, entry_points are nice and shiny and should be used in 21st century
     # Unfortunately, having some dependencies, the load_entry_point in the ge-
     # nerated console script blows up with pkg_resources.DistributionNotFound: requests
-    # if it was installed with pip. 
+    # if it was installed with pip.
     # Pradoxically, solution is to easy_install -U all the dependencies.
     # Therefore, just fall back to the good, old, simple disutils script that works.
     scripts=['distutils_scripts/bb'],
@@ -102,8 +101,8 @@ def bump(args):
     with open(path('./pavement.py'), 'w') as f:
         f.writelines(conf)
 
-
     sh("git commit pavement.py blackbelt/version.py docs/source/conf.py -m 'Version bump to %s'" % '.'.join(version))
+
 
 @task
 def release():

@@ -4,6 +4,7 @@ import click
 
 from blackbelt.handle_github import pull_request
 
+
 @click.group(help='Handle github-related tasks and integrations.')
 def cli():
     pass
@@ -11,4 +12,4 @@ def cli():
 
 @cli.command()
 def pr():
-	pull_request()
+    pull_request()
