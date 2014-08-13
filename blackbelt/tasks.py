@@ -3,6 +3,7 @@ import os
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 
+
 class BlackBelt(click.MultiCommand):
 
     def list_commands(self, ctx):
@@ -23,10 +24,10 @@ class BlackBelt(click.MultiCommand):
 
 cli = BlackBelt(help='Black Belt: automate project The Apiary Way. Please provide a command.')
 
+
 # backward compatibility
 def main():
     cli()
 
 if __name__ == '__main__':
     cli()
-

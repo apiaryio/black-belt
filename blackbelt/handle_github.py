@@ -13,8 +13,10 @@ from handle_trello import get_current_working_ticket, pause_ticket, comment_tick
 
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
+
 def get_github_repo():
     return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
+
 
 def get_remote_repo_info(github_repo_info):
     # 'git@github.com:apiaryio/apiary.git'
@@ -24,17 +26,16 @@ def get_remote_repo_info(github_repo_info):
     return match.groupdict()
 
 
-
 def pull_request():
     branch = get_current_branch()
-    repo   = get_github_repo()
+    repo = get_github_repo()
 
     if 'github.com' not in repo:
         raise ValueError("Current git origin not on github.com; aborting")
 
     ticket = get_current_working_ticket()
 
-    api    = Github(config['github']['access_token'])
+    api = Github(config['github']['access_token'])
 
     pr_description = """
 
@@ -77,7 +78,6 @@ Pull request for [%(name)s](%(url)s).
     }
 
     webbrowser.open(pr_info['html_url'])
-
 
 
 def get_current_branch():

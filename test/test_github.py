@@ -2,15 +2,16 @@ from nose.tools import assert_equals
 
 from blackbelt.handle_github import get_remote_repo_info
 
+
 class TestGithubParsing(object):
 
-	github_repo = 'git@github.com:apiaryio/apiary-test.git'
+    github_repo = 'git@github.com:apiaryio/apiary-test.git'
 
-	def setUp(self):
-		self.parsed = get_remote_repo_info(self.github_repo)
+    def setUp(self):
+        self.parsed = get_remote_repo_info(self.github_repo)
 
-	def test_repo_owner(self):
-		assert_equals('apiaryio', self.parsed['owner'])
+    def test_repo_owner(self):
+        assert_equals('apiaryio', self.parsed['owner'])
 
-	def test_repo_name(self):
-		assert_equals('apiary-test', self.parsed['name'])
+    def test_repo_name(self):
+        assert_equals('apiary-test', self.parsed['name'])
