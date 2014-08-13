@@ -25,6 +25,6 @@ def migrate_label(*args, **kwargs):
 @click.option('--story-card', help='Story Card ID or shortlink')
 @click.option('--story-list', help='Name of the list that should be converted to cards')
 @click.option('--owner', 	  help='Whom to assign a created work card')
+@click.option('--label', 	  help='Assign a label to the newly-created card. For now, label must be a color name.')
 def schedule_list(**kwargs):
 	sl(**kwargs)
-

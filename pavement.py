@@ -3,9 +3,9 @@ from paver.setuputils import setup
 
 options = environment.options
 
-from blackbelt.version import VERSION
-
 NAME = 'blackbelt'
+VERSION = '0.5.11'
+
 requires = ['click', 'requests', 'trello', 'PyGithub']
 
 
@@ -87,7 +87,23 @@ def bump(args):
     with open(path('docs/source/conf.py'), 'w') as f:
         f.writelines(conf)
 
-    sh("git commit blackbelt/version.py docs/source/conf.py -m 'Version bump to %s'" % '.'.join(version))
+    # bump version in this pavement file itself
+    # we cannot just import it because it implies blackbelt already been
+    # installed/in path, which may cause some interesting problems
+    # solvable by mangling with sys.path, but this just feels...better
+    conf = []
+    with open(path('./pavement.py'), 'r') as f:
+        for line in f.readlines():
+            if line.startswith('VERSION = '):
+                line = "VERSION = '%s'\n" % '.'.join(version)
+
+            conf.append(line)
+
+    with open(path('./pavement.py'), 'w') as f:
+        f.writelines(conf)
+
+
+    sh("git commit pavement.py blackbelt/version.py docs/source/conf.py -m 'Version bump to %s'" % '.'.join(version))
 
 @task
 def release():

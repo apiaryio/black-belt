@@ -19,7 +19,7 @@ Product list to Work Cards
 
 To help with this task, one can use this command::
 
-	bb t schedule-list --story-card="defABC" [--owner="TrelloUserName" [--story-list="Checklist Name"]
+	bb t schedule-list --story-card="defABC" [--owner="TrelloUserName" [--story-list="Checklist Name"] [--label="color"]
 
 Story list defaults to "To Do", Owner (that the new work tasks are assigned to) defaults to you.
 
