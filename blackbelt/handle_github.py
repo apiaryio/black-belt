@@ -93,14 +93,14 @@ def merge(pr_url):
 
     pr_info = get_pr_info(pr_url)
 
-    pr_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
+    pr_api_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
 
     headers = {
         'Authorization': "token %s" % config['github']['access_token'],
         'User-Agent': UA_STRING
     }
 
-    r = requests.get(pr_url, headers=headers)
+    r = requests.get(pr_api_url, headers=headers)
 
     if (r.status_code != 200):
         raise ValueError("Cannot retrieve PR info with status code %s: %s" % (r.status_code, r))
