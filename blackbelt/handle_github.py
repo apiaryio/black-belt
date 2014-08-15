@@ -157,4 +157,4 @@ def merge(pr_url):
     if (r.status_code != 204):
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
-    print "#(number)s merged!" % pr_info
+    print "#%(number)s merged!" % pr_info
