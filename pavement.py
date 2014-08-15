@@ -4,7 +4,7 @@ from paver.setuputils import setup
 options = environment.options
 
 NAME = 'blackbelt'
-VERSION = '0.5.11'
+VERSION = '0.6.0'
 
 requires = ['click', 'requests', 'trello', 'PyGithub']
 
@@ -61,6 +61,7 @@ def bump(args):
 
     if len(args) > 0 and args[0] == 'major':
         version[1] += 1
+        version[2] = 0
     else:
         version[2] += 1
 
