@@ -19,6 +19,7 @@ class TestGithubRepoParsing(object):
     def test_repo_name(self):
         assert_equals('apiary-test', self.parsed['name'])
 
+
 class TestGithubPullRequestParsing(object):
 
     github_pr = 'https://github.com/apiaryio/apiary-test/pull/123'
@@ -34,3 +35,7 @@ class TestGithubPullRequestParsing(object):
 
     def test_pr_number(self):
         assert_equals('123', self.parsed['number'])
+
+    def test_files_link(self):
+        parsed = get_pr_info(self.github_pr + '/files')
+        assert_equals('123', parsed['number'])

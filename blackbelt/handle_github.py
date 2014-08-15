@@ -28,7 +28,7 @@ def get_remote_repo_info(github_repo_info):
 
 def get_pr_info(pr_url):
     # 'git@github.com:apiaryio/apiary.git'
-    match = re.match("^.*github.com\/(?P<owner>\S+)\/{1}(?P<name>\S+)\/pull\/{1}(?P<number>\S+)$", pr_url)
+    match = re.match("^.*github.com\/(?P<owner>\S+)\/{1}(?P<name>\S+)\/pull\/{1}(?P<number>\d+).*$", pr_url)
     if not match:
         raise ValueError("Cannot parse pull request URL, bad format")
     return match.groupdict()
