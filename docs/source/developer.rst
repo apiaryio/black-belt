@@ -25,8 +25,7 @@ Issuing Pull Request
 This:
 
 #. Inspects current repository for branches
-#. Inspects ``Doing`` on the :term:`Work Board` for the current working ticket
-  * You should have only one working ticket in ``Doing`` that is assigned only to you
+#. Inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you)
 #. Creates a pull request that references the trello card and references the PR on the card as well
 #. Moves the card to ``Paused/Waiting``
 #. Opens the browser with the PR for further editing/review
