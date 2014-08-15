@@ -32,6 +32,7 @@ This documents focus more on intended workflow from the perspective of two roles
 .. toctree::
    :maxdepth: 2
 
+   developer
    story-owner
    glossary
 
