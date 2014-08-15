@@ -17,7 +17,9 @@ Code review ensures the quality of the code and disperses the knowledge about th
 
 Issuing Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
-	
+
+.. highlight:: bash
+
 	bb gh pr
 
 This:
@@ -32,6 +34,8 @@ This:
 
 Merging Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
+
+.. highlight:: bash
 
 	bb gh merge https://github.com/apiaryio/apiary/pull/1234
 
