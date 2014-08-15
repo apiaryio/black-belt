@@ -130,7 +130,7 @@ def merge(pr_url):
 
     check_output(['git', 'merge', sha, '-m', "Merging pull request #%(number)s: %(title)s " % pr])
 
-    check_output(['git', 'push'])
+    check_output(['git', 'push', 'origin', 'master'])
 
     # verify the merge
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
