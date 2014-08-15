@@ -1,3 +1,4 @@
+.. highlight:: bash
 
 ============
 Developer
@@ -18,7 +19,7 @@ Code review ensures the quality of the code and disperses the knowledge about th
 Issuing Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. highlight:: bash
+Send current branch for code review with::
 
 	bb gh pr
 
@@ -34,7 +35,7 @@ This:
 Merging Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. highlight:: bash
+Merge PR on Github into master with::
 
 	bb gh merge https://github.com/apiaryio/apiary/pull/1234
 

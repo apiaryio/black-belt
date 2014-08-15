@@ -1,3 +1,4 @@
+.. highlight:: c
 
 ============
 Story Owner
@@ -19,8 +20,6 @@ Product list to Work Cards
 
 To help with this task, one can use this command::
 
-.. highlight:: bash
-
 	bb t schedule-list --story-card="defABC" [--owner="TrelloUserName" [--story-list="Checklist Name"] [--label="color"]
 
 Story list defaults to "To Do", Owner (that the new work tasks are assigned to) defaults to you.
@@ -29,8 +28,6 @@ Story list defaults to "To Do", Owner (that the new work tasks are assigned to) 
 Clean sweep
 ------------
 
-All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. 
-
-.. highlight:: bash
+All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
 
 	bb t migrate-label --label="Product: Example" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
