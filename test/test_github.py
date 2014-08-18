@@ -62,5 +62,6 @@ class TestMergeVerificationRetries(object):
         assert_raises(ValueError, lambda: verify_merge(
             self.pr_info,
             self.headers,
-            max_waiting_time=0.1
+            max_waiting_time=0.01,
+            retry_time=0.001
         ))

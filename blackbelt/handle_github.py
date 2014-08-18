@@ -88,7 +88,7 @@ Pull request for [%(name)s](%(url)s).
 def get_current_branch():
     return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
-def verify_merge(pr_info, headers, max_waiting_time=30):
+def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
@@ -99,6 +99,7 @@ def verify_merge(pr_info, headers, max_waiting_time=30):
 
         if (r.status_code == 404):
             if datetime.now() < start_time + timedelta(seconds=max_waiting_time):
+                sleep(retry_time)
                 return False
             else:
                 raise ValueError("GitHub says PR hasn't been merged yet and I've reached the waiting time of %s seconds" % max_waiting_time)
