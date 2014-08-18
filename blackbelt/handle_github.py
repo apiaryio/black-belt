@@ -1,4 +1,4 @@
-from datetime import time, timedelta
+from datetime import datetime, timedelta
 import json
 import re
 from subprocess import check_output
@@ -91,14 +91,14 @@ def get_current_branch():
 def verify_merge(pr_info, headers, max_waiting_time=30):
     
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
-    start_time = time()
+    start_time = datetime.now()
     succeeded = False
 
     def do_request():
         r = requests.get(merge_url, headers=headers)
 
         if (r.status_code == 404):
-            if time() < start_time + timedelta(seconds=max_waiting_time):
+            if datetime.now() < start_time + timedelta(seconds=max_waiting_time):
                 return False
             else:
                 raise ValueError("GitHub says PR hasn't been merged yet and I've reached the waiting time of %s seconds" % max_waiting_time)
