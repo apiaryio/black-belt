@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 import re
 from subprocess import check_output
@@ -87,6 +88,34 @@ Pull request for [%(name)s](%(url)s).
 def get_current_branch():
     return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
+def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
+    
+    merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
+    start_time = datetime.now()
+    succeeded = False
+
+    def do_request():
+        r = requests.get(merge_url, headers=headers)
+
+        if (r.status_code == 404):
+            if datetime.now() < start_time + timedelta(seconds=max_waiting_time):
+                sleep(retry_time)
+                return False
+            else:
+                raise ValueError("GitHub says PR hasn't been merged yet and I've reached the waiting time of %s seconds" % max_waiting_time)
+
+        elif (r.status_code not in [200, 204]):
+            raise ValueError("Can't get PR merge info with status code %s" % r.status_code)
+
+        else:
+            return True
+
+
+    while not succeeded:
+        succeeded = do_request()
+
+
+
 
 def merge(pr_url):
     """ Merge the given pull request...locally """
@@ -132,16 +161,7 @@ def merge(pr_url):
 
     check_output(['git', 'push', 'origin', 'master'])
 
-    # verify the merge
-    merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
-    r = requests.get(pr_url, headers=headers)
-
-    if (r.status_code == 404):
-        raise ValueError("GitHub says PR hasn't been merged yet; not continuing")
-
-    if (r.status_code not in [200, 204]):
-        raise ValueError("Can't get PR merge info with status code %s" % r.status_code)
-
+    verify_merge(pr_info, headers)
 
     # All good, delete branch
     branch_url = "https://api.github.com/repos/%(owner)s/%(name)s/git/refs/heads/%(branch)s" % {
