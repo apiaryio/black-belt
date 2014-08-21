@@ -4,7 +4,7 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 
 ## Development Installation
 
-`virtualenv` assumed (`sudo pip virtualenv`)
+`virtualenv` assumed (`sudo pip install virtualenv`)
 
 ```
 virtualenv venv
