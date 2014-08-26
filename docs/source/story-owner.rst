@@ -28,6 +28,6 @@ Story list defaults to "To Do", Owner (that the new work tasks are assigned to) 
 Clean sweep
 ------------
 
-All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
+All cards with the given label and/or assigned to given user is moved from :term:`Work Board` into given column in the given :term:`Product Board`. ::
 
-	bb t migrate-label --label="Product: Example" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
+	bb t migrate-label [--label="Product: Example"] [--user=nickname] --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"

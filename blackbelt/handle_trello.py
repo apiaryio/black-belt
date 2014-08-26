@@ -10,7 +10,7 @@ import requests
 from blackbelt.apis.trello import *
 from blackbelt.config import config
 
-__all__ = ("schedule_list", "migrate_label", "schedule_list")
+__all__ = ("schedule_list", "migrate_cards", "schedule_list")
 
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
@@ -95,33 +95,55 @@ def comment_ticket(ticket, comment):
     api.cards.new_action_comment(ticket['id'], comment)
 
 
-def migrate_label(label, board, board_to, column, column_to):
+def migrate_cards(label, board, board_to, column, column_to, user):
     api = get_api()
 
     if column:
         raise ValueError("column is now ignored, you need to program support for it")
 
+    if not label and not user:
+        raise ValueError("Either label or user must be provided")
+
     board_info = api.boards.get(board)
 
     final_label = None
 
-    if label in board_info['labelNames'].keys():
-        final_label = label
-    else:
-        for l in board_info['labelNames']:
-            if board_info['labelNames'][l] == label:
-                final_label = l
+    if label:
+        if label in board_info['labelNames'].keys():
+            final_label = label
+        else:
+            for l in board_info['labelNames']:
+                if board_info['labelNames'][l] == label:
+                    final_label = l
 
-    if not final_label:
-        raise ValueError("Cannot find label %s on given board")
+        if not final_label:
+            raise ValueError("Cannot find label %s on given board")
+
+    if user:
+        user = api.members.get(user)
 
     cards = api.boards.get_card(board)
 
     filtered_cards = []
 
     for c in cards:
-        for l in c['labels']:
-            if l['color'] == final_label:
+        label_match = False
+        user_match = False
+
+        if label:
+            for l in c['labels']:
+                if l['color'] == final_label:
+                    label_match = True
+
+        if user:
+            for m in c['idMembers']:
+                if m == user['id']:
+                    user_match = True
+
+        if (label and user and label_match and user_match) \
+            or (label and not user and label_match) \
+            or (user and not label and user_match):
+
                 filtered_cards.append(c)
 
     board_to_info = api.boards.get(board_to)
@@ -139,6 +161,8 @@ def migrate_label(label, board, board_to, column, column_to):
 
     for card in filtered_cards:
         migrate_card(api, card, target_column)
+
+    print("%s cards migrated." % len(filtered_cards))
 
 
 def migrate_card(api, card, target_column):
