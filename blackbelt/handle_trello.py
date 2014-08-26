@@ -10,7 +10,7 @@ import requests
 from blackbelt.apis.trello import *
 from blackbelt.config import config
 
-__all__ = ("schedule_list", "migrate_cards", "schedule_list")
+__all__ = ("schedule_list", "migrate_cards")
 
 TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
