@@ -115,6 +115,7 @@ def migrate_cards(label, board, board_to, column, column_to, user):
             for l in board_info['labelNames']:
                 if board_info['labelNames'][l] == label:
                     final_label = l
+                    break
 
         if not final_label:
             raise ValueError("Cannot find label %s on given board")
@@ -134,11 +135,13 @@ def migrate_cards(label, board, board_to, column, column_to, user):
             for l in c['labels']:
                 if l['color'] == final_label:
                     label_match = True
+                    break
 
         if user:
             for m in c['idMembers']:
                 if m == user['id']:
                     user_match = True
+                    break
 
         if (label and user and label_match and user_match) \
             or (label and not user and label_match) \
