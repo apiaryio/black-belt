@@ -66,6 +66,7 @@ This:
 #. Waits for CircleCI tests to pass
 #. TODO: If they fail, asks for retry
 #. Asks for deploy confirmation
+#. Notify others on HipChat about deploy
 #. Deploys
 #. TODO: If it can figure out related Trello card, moves it to "Deployed by" column
 #. Does *not* bring beer yet, unfortunately

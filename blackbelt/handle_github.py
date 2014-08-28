@@ -11,6 +11,7 @@ import requests
 
 from .config import config
 from .handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
+from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
 
@@ -218,5 +219,9 @@ def deploy(pr_url):
 
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
+
+    post_message("@here deploy in 15 seconds")
+
+    sleep(15)
 
     check_output(['grunt', 'deploy-slug'])
