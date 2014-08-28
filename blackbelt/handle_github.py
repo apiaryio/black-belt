@@ -1,15 +1,18 @@
 from datetime import datetime, timedelta
 import json
+from os.path import exists
 import re
 from subprocess import check_output
 from time import sleep
 import webbrowser
 
+import click
 import requests
 
-from config import config
-from handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
-from version import VERSION
+from .config import config
+from .handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
+from .circle import wait_for_tests
+from .version import VERSION
 
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
@@ -88,6 +91,9 @@ Pull request for [%(name)s](%(url)s).
 def get_current_branch():
     return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
+def get_current_sha():
+    return check_output(['git', 'rev-parse', 'HEAD']).strip()
+
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
@@ -113,9 +119,6 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
     while not succeeded:
         succeeded = do_request()
-
-
-
 
 def merge(pr_url):
     """ Merge the given pull request...locally """
@@ -161,6 +164,8 @@ def merge(pr_url):
 
     check_output(['git', 'push', 'origin', 'master'])
 
+    merge_sha = get_current_sha()
+
     verify_merge(pr_info, headers)
 
     # All good, delete branch
@@ -176,3 +181,29 @@ def merge(pr_url):
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
     print "#%(number)s merged!" % pr_info
+
+    return {
+        'sha': merge_sha,
+        'owner': pr_info['owner'],
+        'name': pr_info['name']
+    }
+
+
+def deploy(pr_url):
+    """ Deploy the given pull request to production """
+    merge_info = merge(pr_url)
+
+    check_output(['grunt', 'create-slug'])
+
+    ci_info = wait_for_tests(
+        sha=merge_info['sha'],
+        owner=merge_info['owner'],
+        name=merge_info['name']
+    )
+
+    if ci_info['failed']:
+        raise ValueError("Circle build failed. TODO: Auto retry.")
+
+    click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % sha, abort=True)
+
+    check_output(['grunt', 'deploy-slug'])
