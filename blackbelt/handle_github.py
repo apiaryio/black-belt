@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import json
 from os.path import exists
 import re
-from subprocess import check_output
+from subprocess import check_output, check_call
 from time import sleep
 import webbrowser
 
@@ -203,6 +203,14 @@ def deploy(pr_url):
 
     if ci_info['failed']:
         raise ValueError("Circle build failed. TODO: Auto retry.")
+
+    if exists('/usr/bin/osascript'):
+        message = "New Apiary version is ready for deploy"
+        try:
+            check_call(['/usr/bin/osascript', '-e', "display notification \"%s\"" % message])
+        except Exception:
+            print "[Can't notify user using osascript]"
+
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % sha, abort=True)
 
