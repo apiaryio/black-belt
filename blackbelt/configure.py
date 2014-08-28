@@ -39,6 +39,9 @@ def configure_blackbelt():
         },
         'circleci' : {
             'access_token' : None
+        },
+        'hipchat': {
+            'access_token': None
         }
     }
 
@@ -63,6 +66,13 @@ def configure_blackbelt():
         config=config,
         token_url="https://circleci.com/account/api"
     )
+
+    get_token(
+        group_name='hipchat',
+        config=config,
+        token_url="https://apiary.hipchat.com/account/api"
+    )
+
 
     with open(expanduser('~/.blackbelt'), 'w') as f:
         f.write(json.dumps(config))
