@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 from time import sleep
 import sys
 
@@ -7,7 +6,8 @@ import requests
 
 from .config import config
 
-MAX_WAIT_MINUTES = 60
+MAX_WAIT_MINUTES = 120
+
 
 class Client(object):
 
@@ -88,5 +88,5 @@ def wait_for_tests(sha, owner, name, retry_interval=30):
             project=name,
             number=build['build_num']
         )
-        
+
     return build
