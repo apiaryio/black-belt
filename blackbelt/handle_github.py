@@ -195,6 +195,8 @@ def deploy(pr_url):
 
     check_output(['grunt', 'create-slug'])
 
+    print "Waiting for tests to pass..."
+
     ci_info = wait_for_tests(
         sha=merge_info['sha'],
         owner=merge_info['owner'],
@@ -212,6 +214,6 @@ def deploy(pr_url):
             print "[Can't notify user using osascript]"
 
 
-    click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % sha, abort=True)
+    click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
     check_output(['grunt', 'deploy-slug'])
