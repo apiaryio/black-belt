@@ -207,9 +207,12 @@ def deploy(pr_url):
         raise ValueError("Circle build failed. TODO: Auto retry.")
 
     if exists('/usr/bin/osascript'):
-        message = "New Apiary version is ready for deploy"
+        message = "New version %s ready for deploy" % merge_info['sha']
         try:
-            check_call(['/usr/bin/osascript', '-e', "display notification \"%s\"" % message])
+            check_call(['/usr/bin/osascript', '-e', "display notification \"%(message)s\" with title \"%(title)s\"" % {
+                'message': message,
+                'title': 'Apiary Deployment'
+            }])
         except Exception:
             print "[Can't notify user using osascript]"
 
