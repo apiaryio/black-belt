@@ -31,6 +31,7 @@ This:
 #. Moves the card to ``Paused/Waiting``
 #. Opens the browser with the PR for further editing/review
 
+.. _pr-merge:
 
 Merging Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
@@ -49,3 +50,23 @@ This:
 TODO:
 
 * Comment the associated Trello card
+
+
+Deploying Pull Requests
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Deploy PR to production with::
+
+	bb gh deploy https://github.com/apiaryio/apiary/pull/1234
+
+This:
+
+#. Does :ref:`pr-merge`
+#. Prepares Heroku deploy slugs using ``grunt create-slug``
+#. Waits for CircleCI tests to pass
+#. TODO: If they fail, asks for retry
+#. Asks for deploy confirmation
+#. Notify others on HipChat about deploy
+#. Deploys
+#. TODO: If it can figure out related Trello card, moves it to "Deployed by" column
+#. Does *not* bring beer yet, unfortunately

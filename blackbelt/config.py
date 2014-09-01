@@ -8,8 +8,18 @@ try:
         config = json.loads(f.read())
 except IOError:
     config = {
-        'trello': {},
-        'github': {}
+        'trello': {
+            'access_token': None
+        },
+        'github': {
+            'access_token': None
+        },
+        'circleci': {
+            'access_token': None
+        },
+        'hipchat': {
+            'access_token': None
+        }
     }
 # default config, overwrite/modularize
 
