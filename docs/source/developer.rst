@@ -16,6 +16,8 @@ Code review
 
 Code review ensures the quality of the code and disperses the knowledge about the code and features through the team.
 
+.. _issue-pr:
+
 Issuing Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
 
