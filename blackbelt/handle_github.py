@@ -186,13 +186,16 @@ def merge(pr_url):
     return {
         'sha': merge_sha,
         'owner': pr_info['owner'],
-        'name': pr_info['name']
+        'name': pr_info['name'],
+        'number': pr_info['number']
     }
 
 
 def deploy(pr_url):
     """ Deploy the given pull request to production """
     merge_info = merge(pr_url)
+
+    post_message("@here Merged PR #%(number)s; going to deploy once tests are passing..." % merge_info)
 
     check_output(['grunt', 'create-slug'])
 
