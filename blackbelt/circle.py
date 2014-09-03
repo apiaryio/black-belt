@@ -75,7 +75,7 @@ def wait_for_tests(sha, owner, name, retry_interval=30):
 
     start_time = datetime.now()
 
-    while build['status'] in ['running', 'waiting']:
+    while build['status'] in ['running', 'waiting', 'scheduled']:
         if datetime.now() < start_time + timedelta(minutes=MAX_WAIT_MINUTES):
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -88,5 +88,8 @@ def wait_for_tests(sha, owner, name, retry_interval=30):
             project=name,
             number=build['build_num']
         )
+
+    # guards to prevent false positives
+    assert build['build_time_milis'] > 0
 
     return build
