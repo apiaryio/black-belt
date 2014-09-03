@@ -12,7 +12,14 @@ setup(
     name=NAME,
     version=VERSION,
     description='Project automation the Apiary way',
-    long_description="""Internal so far""",
+    long_description="""
+    Black Belt: Project Automation The Apiary Way
+    ==================================================
+
+    Integrates useful GitHub workflow with Trello, Hipchat and Circle CI.
+
+    Please visit `the Black Belt documentation <http://black-belt.readthedocs.org/en/latest/>`_ for more details.
+    """,
     author='Lukas Linhart',
     author_email='lukas@apiary.io',
     url='http://github.com/apiaryio/black-belt',
