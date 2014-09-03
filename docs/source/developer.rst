@@ -64,6 +64,7 @@ Deploy PR to production with::
 This:
 
 #. Does :ref:`pr-merge`
+#. Inform people on HipChat about the merge and the deployment intent
 #. Prepares Heroku deploy slugs using ``grunt create-slug``
 #. Waits for CircleCI tests to pass
 #. TODO: If they fail, asks for retry
