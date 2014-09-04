@@ -90,6 +90,6 @@ def wait_for_tests(sha, owner, name, retry_interval=30):
         )
 
     # guards to prevent false positives
-    assert build['build_time_milis'] > 0
+    assert build['build_time_millis'] > 0
 
     return build
