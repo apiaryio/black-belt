@@ -37,6 +37,18 @@ def get_pr_info(pr_url):
     return match.groupdict()
 
 
+def get_username():
+    url = "https://api.github.com/user"
+
+    headers = {
+        'Authorization': "token %s" % config['github']['access_token']
+    }
+
+    res = requests.get(url, headers=headers)
+
+    return res.json()['login']
+
+
 def pull_request():
     branch = get_current_branch()
     repo = get_github_repo()

@@ -10,11 +10,28 @@ Those live on the :term:`Work Board`.
 
 Those are the task :term:`Developer` may want to perform. 
 
+.. _development:
+
 ------------------------------------
-Code review
+Development as usual
 ------------------------------------
 
-Code review ensures the quality of the code and disperses the knowledge about the code and features through the team.
+.. _next-card:
+
+Move on to the next task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Move on to the next (Trello) card with::
+
+	bb t next
+
+This:
+
+#. Inspects ``To Do`` on the :term:`Work Board` for the highest ticket assigned to you
+#. Creates a new local git branch inferred from ticket name and prefixed with your github prefix
+	(It is always forked from master and ensures master is up to date)
+#. Moves the card to ``Doing``
+
 
 .. _issue-pr:
 
@@ -32,6 +49,13 @@ This:
 #. Creates a pull request that references the trello card and references the PR on the card as well
 #. Moves the card to ``Paused/Waiting``
 #. Opens the browser with the PR for further editing/review
+
+------------------------------------
+Code review
+------------------------------------
+
+Code review ensures the quality of the code and disperses the knowledge about the code and features through the team.
+
 
 .. _pr-merge:
 

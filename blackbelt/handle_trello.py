@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from subprocess import check_output, check_call
 import sys
 import urllib
 
@@ -50,6 +51,21 @@ def get_column(name, board_id=None):
         raise ValueError("Cannot find column %s" % name)
 
     return column
+
+def get_next_todo_card():
+    api = get_api()
+
+    column = get_column(name=TODO_QUEUE_NAME)
+    cards = api.lists.get_card(column['id'])
+
+    me = api.tokens.get_member(config['trello']['access_token'])
+
+    my_cards = [card for card in cards if me['id'] in card['idMembers']]
+
+    if len(my_cards) < 1:
+        raise ValueError("No card assigned to you in the To Do Queue -- be happy, your job is done!")
+
+    return my_cards[0]
 
 
 def get_current_working_ticket():
@@ -138,11 +154,13 @@ def migrate_label(label, board, board_to, column, column_to):
 
 
     for card in filtered_cards:
-        migrate_card(api, card, target_column)
+        migrate_card(card, target_column)
 
 
-def migrate_card(api, card, target_column):
+def migrate_card(card, target_column):
     print("Moving card %(id)s: %(name)s" % card)
+
+    api = get_api()
 
     move_to_board(api, card['id'], target_column['idBoard'])
     api.cards.update_idList(card['id'], target_column['id'])
@@ -188,7 +206,6 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
     story_card = api.cards.get(urllib.quote(story_card))
     card_list = api.cards.get_checklist(story_card['id'])
 
-
     if not owner:
         owner = api.tokens.get_member(config['trello']['access_token'])
     else:
@@ -210,3 +227,41 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
             api.cards.new_label(card['id'], label)
 
     print "Done"
+
+
+def infer_branch_name(url):
+    return '-'.join(url.split('/')[~0].split('-')[1:])
+
+
+def next_card():
+    card = get_next_todo_card()
+
+    ticket_urlname = infer_branch_name(card['url'])
+
+    # set up local branch
+    from .handle_github import get_username, get_current_branch
+
+    prefix = get_username().lower()
+
+    branch_name = prefix + '/' + ticket_urlname
+
+    if get_current_branch() != 'master':
+        check_output(['git', 'checkout', 'master'])
+
+    check_output(['git', 'pull'])
+
+    # You think you might do git checkout branch origin/branch?
+    # Oh my, silly you. All of those require the origin branch to exists,
+    # therefore pushing. We don't want to push at this stage only to trigger
+    # a duplicate CI check on what is basically a master.
+    # Therefore, time for some dark magic. If it breaks your git, please
+    # carry on and sacrifice a chicken to the daemons of Linux/s
+
+    check_output(['git', 'branch', branch_name, 'origin/master'])
+    check_output(['git', 'checkout', branch_name])
+    check_output(['git', 'config', 'branch."%s".remote' % branch_name, 'origin'])
+    check_output(['git', 'config', 'branch."%s".merge' % branch_name, "refs/heads/\"%s\"" % branch_name])
+    check_output(['git', 'config', 'branch."%s".rebase' % branch_name, 'true'])
+
+    # move to todo
+    migrate_card(card=card, target_column=get_column(name=config['trello']['work_column_name']))
