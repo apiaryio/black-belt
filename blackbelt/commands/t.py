@@ -1,6 +1,10 @@
 import click
 
-from blackbelt.handle_trello import migrate_label as ml, schedule_list as sl
+from blackbelt.handle_trello import (
+    migrate_label as ml,
+    schedule_list as sl,
+    next_card as n
+)
 
 
 @click.group(help='Handle Trello-related actions and integrations.')
@@ -24,4 +28,11 @@ def migrate_label(*args, **kwargs):
 @click.option('--label', help='Assign a label to the newly-created card. For now, label must be a color name.')
 @click.argument('story_card')
 def schedule_list(**kwargs):
+    """ Takes a TODO checklist on a given Story Card. Converts the items into the Work Overview Cards. """
     sl(**kwargs)
+
+
+@cli.command()
+def next(**kwargs):
+    """ Takes the top card from To Do queue, moves it to doing and creates proper branch """
+    n(**kwargs)
