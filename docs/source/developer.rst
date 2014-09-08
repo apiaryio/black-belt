@@ -31,6 +31,7 @@ This:
 #. Creates a new local git branch inferred from ticket name and prefixed with your github prefix
 	(It is always forked from master and ensures master is up to date)
 #. Moves the card to ``Doing``
+#. Opens the card in browser for review
 
 
 .. _issue-pr:

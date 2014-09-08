@@ -1,12 +1,9 @@
-import json
-import os
 import re
-from subprocess import check_output, check_call
-import sys
+from subprocess import check_output
 import urllib
+import webbrowser
 
 from trello import TrelloApi
-import requests
 
 from blackbelt.apis.trello import *
 from blackbelt.config import config
@@ -265,3 +262,6 @@ def next_card():
 
     # move to todo
     migrate_card(card=card, target_column=get_column(name=config['trello']['work_column_name']))
+
+    # open card for review
+    webbrowser.open(card['url'])
