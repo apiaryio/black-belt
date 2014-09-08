@@ -259,9 +259,9 @@ def next_card():
 
     check_output(['git', 'branch', branch_name, 'origin/master'])
     check_output(['git', 'checkout', branch_name])
-    check_output(['git', 'config', "branch.\"%s\".remote" % branch_name, 'origin'])
-    check_output(['git', 'config', "branch.\"%s\".merge" % branch_name, "refs/heads/\"%s\"" % branch_name])
-    check_output(['git', 'config', "branch.\"%s\".rebase" % branch_name, 'true'])
+    check_output(['git', 'config', 'branch."%s".remote' % branch_name, 'origin'])
+    check_output(['git', 'config', 'branch."%s".merge' % branch_name, "refs/heads/\"%s\"" % branch_name])
+    check_output(['git', 'config', 'branch."%s".rebase' % branch_name, 'true'])
 
     # move to todo
     migrate_card(card=card, target_column=get_column(name=config['trello']['work_column_name']))
