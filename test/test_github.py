@@ -6,7 +6,8 @@ import requests
 from blackbelt.handle_github import (
     get_remote_repo_info,
     get_pr_info,
-    verify_merge
+    verify_merge,
+    get_pr_ticket_url
 )
 
 
@@ -43,6 +44,23 @@ class TestGithubPullRequestParsing(object):
     def test_files_link(self):
         parsed = get_pr_info(self.github_pr + '/files')
         assert_equals('123', parsed['number'])
+
+
+    def test_trello_id_extracted(self):
+        link = get_pr_ticket_url("""
+        # This is edited and a long pull requests
+        Hoever, I'd like to warn you...
+
+        Pull request for [Naming fixes](https://trello.com/c/yx2SNE3J/1910-naming-fixes).
+        """)
+
+        assert_equals('yx2SNE3J', link)
+
+    def test_error_on_bad_phrase(self):
+        assert_raises(ValueError, lambda:get_pr_ticket_url("""
+        Related to [naming fixes](https://trello.com/c/yx2SNE3J/1910-naming-fixes)
+        """))
+
 
 
 class TestMergeVerificationRetries(object):

@@ -19,6 +19,8 @@ GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
 UA_STRING = "black-belt/%s" % VERSION
 
+PR_PHRASE_PREFIX="Pull request for"
+
 
 def get_github_repo():
     return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
@@ -57,12 +59,16 @@ def pull_request():
         raise ValueError("Current git origin not on github.com; aborting")
 
     ticket = get_current_working_ticket()
+    md_link = "[%(name)s](%(url)s)" % ticket
 
     pr_description = """
 
-Pull request for [%(name)s](%(url)s).
+%(phrase)s %(link)s.
 
-    """ % ticket
+    """ % {
+        'phrase': PR_PHRASE_PREFIX,
+        'link': md_link
+    }
 
     repo_info = get_remote_repo_info(repo)
 
@@ -201,8 +207,18 @@ def merge(pr_url):
         'sha': merge_sha,
         'owner': pr_info['owner'],
         'name': pr_info['name'],
-        'number': pr_info['number']
+        'number': pr_info['number'],
+        'description': pr_info['body']
     }
+
+def get_pr_ticket_url(description):
+    match = re.search(PR_PHRASE_PREFIX+ ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
+    if not match or not 'id' in match.groupdict():
+        raise ValueError("Can't find URL in the PR description")
+
+    print match.groupdict()['id']
+
+    return match.groupdict()['id']
 
 
 def deploy(pr_url):
@@ -252,5 +268,7 @@ def deploy(pr_url):
     sleep(15)
 
     check_output(['grunt', 'deploy-slug'])
+
+    ticket_id = get_pr_ticket_id(merge_info['description'])
 
 
