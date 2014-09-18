@@ -1,9 +1,7 @@
 from nose.tools import assert_equals, assert_raises
 from nose.plugins.skip import SkipTest
 
-import requests
-
-from blackbelt.config import config
+import os
 
 from blackbelt.hipchat import Client
 
@@ -19,6 +17,9 @@ class TestBuildInfoRetrieval(object):
         try:
             self.client = Client()
         except ValueError:
+            raise SkipTest()
+
+        if os.environ.get('FORCE_DISCOVERY') != '1':
             raise SkipTest()
 
     def test_posting_message(self):

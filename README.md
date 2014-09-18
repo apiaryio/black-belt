@@ -15,6 +15,13 @@ paver develop
 paver test
 ```
 
+## Testing
+
+`paver test`
+
+If you ran `bb init` and you want to do "discovery testing" with the integration tests,
+set `FORCE_DISCOVERY`environmental variable to `1`.
+
 ## Release
 
 When the time is right, run `paver bump`. 

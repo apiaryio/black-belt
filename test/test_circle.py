@@ -1,8 +1,6 @@
-from nose.tools import assert_equals, assert_raises
 from nose.plugins.skip import SkipTest
-from mock import patch, MagicMock
 
-import requests
+import os
 
 from blackbelt.config import config
 
@@ -20,6 +18,9 @@ class TestBuildInfoRetrieval(object):
         try:
             self.client = Client()
         except ValueError:
+            raise SkipTest()
+
+        if os.environ.get('FORCE_DISCOVERY') != '1':
             raise SkipTest()
 
     def test_repo_owner(self):
