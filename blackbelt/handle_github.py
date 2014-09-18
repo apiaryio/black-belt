@@ -222,6 +222,16 @@ def deploy(pr_url):
     )
 
     if ci_info['failed']:
+        if exists('/usr/bin/osascript'):
+            message = "Tests FAILED for %s" % merge_info['sha']
+            try:
+                check_call(['/usr/bin/osascript', '-e', "display notification \"%(message)s\" with title \"%(title)s\"" % {
+                    'message': message,
+                    'title': 'Apiary Deployment'
+                }])
+            except Exception:
+                print "[Can't notify user using osascript]"
+
         raise ValueError("Circle build failed. TODO: Auto retry.")
 
     if exists('/usr/bin/osascript'):
@@ -242,3 +252,5 @@ def deploy(pr_url):
     sleep(15)
 
     check_output(['grunt', 'deploy-slug'])
+
+
