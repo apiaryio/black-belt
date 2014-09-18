@@ -9,8 +9,14 @@ import webbrowser
 import click
 import requests
 
+from .apis.trello import Trello as TrelloApi
 from .config import config
-from .handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
+from .handle_trello import (
+    get_current_working_ticket,
+    pause_ticket,
+    comment_ticket,
+    move_to_deployed
+)
 from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
@@ -211,7 +217,7 @@ def merge(pr_url):
         'description': pr_info['body']
     }
 
-def get_pr_ticket_url(description):
+def get_pr_ticket_id(description):
     match = re.search(PR_PHRASE_PREFIX+ ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
     if not match or not 'id' in match.groupdict():
         raise ValueError("Can't find URL in the PR description")
@@ -269,6 +275,8 @@ def deploy(pr_url):
 
     check_output(['grunt', 'deploy-slug'])
 
-    ticket_id = get_pr_ticket_id(merge_info['description'])
+    comment = "Deployed by me with version %s. Please verify it works." % merge_info['sha']
 
+    ticket_id = get_pr_ticket_id(merge_info['description'])
+    move_to_deployed(card_id=ticket_id, comment=comment)
 

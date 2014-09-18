@@ -18,6 +18,8 @@ STORY_CARD_TODO_LIST_NAMES = [
 ]
 
 TODO_QUEUE_NAME = "To Do Queue"
+DEPLOY_QUEUE_NAME = "Ready"
+DEPLOYED_PREFIX = "Deployed by"
 
 
 def get_token_url():
@@ -97,12 +99,12 @@ def get_current_working_ticket():
 def pause_ticket(ticket):
     api = get_api()
     column = get_column(name=config['trello']['pause_column_name'])
-    api.move_card(ticket_id=ticket['id'], column_id=column['id'])
+    api.move_card(card_id=ticket['id'], column_id=column['id'])
 
 
 def comment_ticket(ticket, comment):
     api = get_api()
-    api.comment_card(ticket_id=ticket['id'], comment=comment)
+    api.comment_card(card_id=ticket['id'], comment=comment)
 
 
 def migrate_label(label, board, board_to, column, column_to):
@@ -258,8 +260,43 @@ def next_card():
     check_output(['git', 'config', 'branch."%s".merge' % branch_name, "refs/heads/\"%s\"" % branch_name])
     check_output(['git', 'config', 'branch."%s".rebase' % branch_name, 'true'])
 
-    # move to todo
-    migrate_card(card=card, target_column=get_column(name=config['trello']['work_column_name']))
+    # move to Doing
+    api = get_api()
+    api.move_card(
+        card_id=card['id'],
+        column_id=get_column(name=config['trello']['work_column_name'])['id']
+    )
 
     # open card for review
     webbrowser.open(card['url'])
+
+def move_to_deployed(card_id, comment=None):
+    """ If the card is in Ready column, move it to deployed """
+    api = get_api()
+
+    column = get_column(name=DEPLOY_QUEUE_NAME)
+    card = api.get_card(card_id=ticket_id)
+        
+    if card['idList'] != column['id']:
+        print "The card is not in column %(column)s. NOT moving to Deployed for you." % {
+            'column': DEPLOY_QUEUE_NAME
+        }
+    else:
+
+        columns = api.get_columns(board_id=config['trello']['work_board_id'])
+        deployed = None
+
+        for col in columns:
+            if col['name'].startswith(DEPLOYED_PREFIX):
+                deployed = col
+                # Use the first "Deployed by" as the old ones are
+                # sometimes "trailing" at the end of the board
+                break
+
+        if not column:
+            print "Can't find \"Deployed by\" column, NOT moving the card for you"
+        else:
+            api.move_card(card_id=card_id, column_id=deployed['id'])
+            if comment:
+                api.comment_card(card_id=card_id, comment=comment)
+

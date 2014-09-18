@@ -18,7 +18,7 @@ class Trello(object):
     APP_NAME = 'black-belt'
     URL_PREFIX = "https://trello.com/1"
 
-    def __init__(self, access_token):
+    def __init__(self, access_token=None):
         self._access_token = access_token
         if not self._access_token and config.get('trello') and config['trello'].get('access_token'):
             self._access_token = config['trello']['access_token']
@@ -29,15 +29,19 @@ class Trello(object):
         if not self._access_token:
             raise ConfigurationError("Trying to talk to Trello without having access token")
 
-        url = URL_PREFIX + url
+        url = self.URL_PREFIX + url
         response = getattr(requests, method)(
             url,
             params={
-                key: self.API_KEY,
-                token: self._access_token
+                'key': self.API_KEY,
+                'token': self._access_token
             },
             data=data
         )
+        # try:
+        #     print response.text
+        # except Exception:
+        #     print 'Cannot print'
         response.raise_for_status()
         return json.loads(response.content)
 
@@ -101,10 +105,10 @@ class Trello(object):
             self.do_request("/cards/%s/idBoard" % card_id, data={'value': board_id}, method='put')
 
         if column_id:
-            self.do_request("/cards/%s/idList" %  card_id, data={'value': list_id}, method='put')
+            self.do_request("/cards/%s/idList" %  card_id, data={'value': column_id}, method='put')
 
     def comment_card(self, card_id, comment):
-        self.do_request("/cards/%s/actions/comments" % card_id, method='post', data={'text': text})
+        self.do_request("/cards/%s/actions/comments" % card_id, method='post', data={'text': comment})
 
     def add_card_member(card_id, member_id):
         self.do_request(

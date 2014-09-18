@@ -7,7 +7,7 @@ from blackbelt.handle_github import (
     get_remote_repo_info,
     get_pr_info,
     verify_merge,
-    get_pr_ticket_url
+    get_pr_ticket_id
 )
 
 
@@ -47,7 +47,7 @@ class TestGithubPullRequestParsing(object):
 
 
     def test_trello_id_extracted(self):
-        link = get_pr_ticket_url("""
+        link = get_pr_ticket_id("""
         # This is edited and a long pull requests
         Hoever, I'd like to warn you...
 
@@ -57,7 +57,7 @@ class TestGithubPullRequestParsing(object):
         assert_equals('yx2SNE3J', link)
 
     def test_error_on_bad_phrase(self):
-        assert_raises(ValueError, lambda:get_pr_ticket_url("""
+        assert_raises(ValueError, lambda:get_pr_ticket_id("""
         Related to [naming fixes](https://trello.com/c/yx2SNE3J/1910-naming-fixes)
         """))
 
