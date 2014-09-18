@@ -13,7 +13,7 @@ from .apis.trello import Trello as TrelloApi
 from .config import config
 from .handle_trello import (
     get_current_working_ticket,
-    pause_ticket,
+    get_ticket_ready,
     comment_ticket,
     move_to_deployed
 )
@@ -97,7 +97,7 @@ def pull_request():
         print r.json()
         raise ValueError("PR ended with status code %s: %s" % (r.status_code, r))
 
-    pause_ticket(ticket)
+    get_ticket_ready(ticket)
 
     pr_info = r.json()
 
@@ -214,15 +214,13 @@ def merge(pr_url):
         'owner': pr_info['owner'],
         'name': pr_info['name'],
         'number': pr_info['number'],
-        'description': pr_info['body']
+        'description': pr['body']
     }
 
 def get_pr_ticket_id(description):
     match = re.search(PR_PHRASE_PREFIX+ ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
     if not match or not 'id' in match.groupdict():
         raise ValueError("Can't find URL in the PR description")
-
-    print match.groupdict()['id']
 
     return match.groupdict()['id']
 

@@ -1,6 +1,5 @@
 import re
 from subprocess import check_output
-import urllib
 import webbrowser
 
 #from blackbelt.apis.trello import *
@@ -47,6 +46,7 @@ def get_column(name, board_id=None):
         raise ValueError("Cannot find column %s" % name)
 
     return column
+
 
 def get_next_todo_card():
     api = get_api()
@@ -96,9 +96,9 @@ def get_current_working_ticket():
     return work_card
 
 
-def pause_ticket(ticket):
+def get_ticket_ready(ticket):
     api = get_api()
-    column = get_column(name=config['trello']['pause_column_name'])
+    column = get_column(name=DEPLOY_QUEUE_NAME)
     api.move_card(card_id=ticket['id'], column_id=column['id'])
 
 
@@ -139,15 +139,12 @@ def migrate_label(label, board, board_to, column, column_to):
     board_to_info = api.get_board(board_id=board_to)
     board_to_columns = api.get_columns(board_id=board_to_info['id'])
 
-    targetColumn = None
-
     for c in board_to_columns:
         if c['name'] == column_to:
             target_column = c
 
     if not target_column:
         raise ValueError("Cannot find target column %s" % column_to)
-
 
     for card in filtered_cards:
         print("Moving card %(id)s: %(name)s" % card)
@@ -215,7 +212,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
             list_id=work_queue['id']
         )
 
-        create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
+        api.create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
 
         api.delete_checklist_item(checklist_id=todo_list['id'], checklist_item_id=item['id'])
 
@@ -270,13 +267,14 @@ def next_card():
     # open card for review
     webbrowser.open(card['url'])
 
+
 def move_to_deployed(card_id, comment=None):
     """ If the card is in Ready column, move it to deployed """
     api = get_api()
 
     column = get_column(name=DEPLOY_QUEUE_NAME)
-    card = api.get_card(card_id=ticket_id)
-        
+    card = api.get_card(card_id=card_id)
+
     if card['idList'] != column['id']:
         print "The card is not in column %(column)s. NOT moving to Deployed for you." % {
             'column': DEPLOY_QUEUE_NAME
@@ -299,4 +297,3 @@ def move_to_deployed(card_id, comment=None):
             api.move_card(card_id=card_id, column_id=deployed['id'])
             if comment:
                 api.comment_card(card_id=card_id, comment=comment)
-
