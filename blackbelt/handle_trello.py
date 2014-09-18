@@ -3,14 +3,13 @@ from subprocess import check_output
 import urllib
 import webbrowser
 
-from trello import TrelloApi
-
-from blackbelt.apis.trello import *
+#from blackbelt.apis.trello import *
 from blackbelt.config import config
+
+from .apis.trello import Trello as TrelloApi
 
 __all__ = ("schedule_list", "migrate_label", "schedule_list")
 
-TRELLO_API_KEY = "2e4bb3b8ec5fe2ff6c04bf659ee4553b"
 
 STORY_CARD_TODO_LIST_NAMES = [
     "To Do",
@@ -22,13 +21,11 @@ TODO_QUEUE_NAME = "To Do Queue"
 
 
 def get_token_url():
-    return TrelloApi(apikey=TRELLO_API_KEY).get_token_url("black-belt")
+    return TrelloApi().get_token_url("black-belt")
 
 
 def get_api():
-    api = TrelloApi(apikey=TRELLO_API_KEY)
-    api.set_token(config['trello']['access_token'])
-    return api
+    return TrelloApi()
 
 
 def get_column(name, board_id=None):
@@ -37,7 +34,7 @@ def get_column(name, board_id=None):
     if not board_id:
         board_id = config['trello']['work_board_id']
 
-    columns = api.boards.get_list(board_id)
+    columns = api.get_columns(board_id)
     column = None
 
     for col in columns:
@@ -53,9 +50,9 @@ def get_next_todo_card():
     api = get_api()
 
     column = get_column(name=TODO_QUEUE_NAME)
-    cards = api.lists.get_card(column['id'])
+    cards = api.get_cards(column_id=column['id'])
 
-    me = api.tokens.get_member(config['trello']['access_token'])
+    me = api.get_myself()
 
     my_cards = [card for card in cards if me['id'] in card['idMembers']]
 
@@ -70,9 +67,9 @@ def get_current_working_ticket():
 
     column = get_column(name=config['trello']['work_column_name'])
 
-    cards = api.lists.get_card(column['id'])
+    cards = api.get_cards(column_id=column['id'])
 
-    me = api.tokens.get_member(config['trello']['access_token'])
+    me = api.get_myself()
 
     my_cards = [card for card in cards if me['id'] in card['idMembers']]
     work_card = None
@@ -100,12 +97,12 @@ def get_current_working_ticket():
 def pause_ticket(ticket):
     api = get_api()
     column = get_column(name=config['trello']['pause_column_name'])
-    api.cards.update_idList(ticket['id'], column['id'])
+    api.move_card(ticket_id=ticket['id'], column_id=column['id'])
 
 
 def comment_ticket(ticket, comment):
     api = get_api()
-    api.cards.new_action_comment(ticket['id'], comment)
+    api.comment_card(ticket_id=ticket['id'], comment=comment)
 
 
 def migrate_label(label, board, board_to, column, column_to):
@@ -114,7 +111,7 @@ def migrate_label(label, board, board_to, column, column_to):
     if column:
         raise ValueError("column is now ignored, you need to program support for it")
 
-    board_info = api.boards.get(board)
+    board_info = api.get_board(board_id=board)
 
     final_label = None
 
@@ -128,7 +125,7 @@ def migrate_label(label, board, board_to, column, column_to):
     if not final_label:
         raise ValueError("Cannot find label %s on given board")
 
-    cards = api.boards.get_card(board)
+    cards = api.get_cards(board_id=board)
 
     filtered_cards = []
 
@@ -137,8 +134,8 @@ def migrate_label(label, board, board_to, column, column_to):
             if l['color'] == final_label:
                 filtered_cards.append(c)
 
-    board_to_info = api.boards.get(board_to)
-    board_to_columns = api.boards.get_list(board_to_info['id'])
+    board_to_info = api.get_board(board_id=board_to)
+    board_to_columns = api.get_columns(board_id=board_to_info['id'])
 
     targetColumn = None
 
@@ -151,16 +148,12 @@ def migrate_label(label, board, board_to, column, column_to):
 
 
     for card in filtered_cards:
-        migrate_card(card, target_column)
-
-
-def migrate_card(card, target_column):
-    print("Moving card %(id)s: %(name)s" % card)
-
-    api = get_api()
-
-    move_to_board(api, card['id'], target_column['idBoard'])
-    api.cards.update_idList(card['id'], target_column['id'])
+        print("Moving card %(id)s: %(name)s" % card)
+        api.move_card(
+            card_id=card['id'],
+            board_id=target_column['idBoard'],
+            list_id=target_column['id']
+        )
 
 
 def get_conversion_items(api, card_list, story_card, story_list):
@@ -182,7 +175,7 @@ def get_conversion_items(api, card_list, story_card, story_list):
         lists = ', '.join([i['name'] for i in card_list])
         raise ValueError("Cannot find checklist to convert. Please provide a correct --story-list parameter. Available lists are: %s" % lists)
 
-    list_items = api.checklists.get_checkItem(todo_list['id'])
+    list_items = api.get_checklist_items(list_id=todo_list['id'])
     return (todo_list, [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')])
 
 
@@ -200,13 +193,13 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
     if match:
         story_card = match.groupdict()['id']
 
-    story_card = api.cards.get(urllib.quote(story_card))
-    card_list = api.cards.get_checklist(story_card['id'])
+    story_card = api.get_cards(card_url=story_card)
+    card_list = api.get_card_checklist(card_id=story_card['id'])
 
     if not owner:
-        owner = api.tokens.get_member(config['trello']['access_token'])
+        owner = api.get_myself()
     else:
-        owner = api.members.get(owner)
+        owner = api.get_member(member_name=owner)
 
     work_queue = get_column(TODO_QUEUE_NAME)
 
@@ -214,14 +207,19 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
 
     for item in conversion_items:
         desc = "Part of %(url)s" % story_card
-        card = api.cards.new(name=item['name'], desc=desc, idList=work_queue['id'])
+        card = api.create_card(
+            name=item['name'],
+            description=desc,
+            list_id=work_queue['id']
+        )
 
         create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
-        api.checklists.delete_checkItem_idCheckItem(idCheckItem=item['id'], checklist_id=todo_list['id'])
 
-        api.cards.new_member(card['id'], owner['id'])
+        api.delete_checklist_item(checklist_id=todo_list['id'], checklist_item_id=item['id'])
+
+        api.add_card_member(card_id=card['id'], member_id=owner['id'])
         if label:
-            api.cards.new_label(card['id'], label)
+            api.label_card(card_id=card['id'], label=label)
 
     print "Done"
 

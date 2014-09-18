@@ -104,11 +104,12 @@ Pull request for [%(name)s](%(url)s).
 def get_current_branch():
     return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
+
 def get_current_sha():
     return check_output(['git', 'rev-parse', 'HEAD']).strip()
 
+
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
-    
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
     succeeded = False
@@ -132,6 +133,7 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
     while not succeeded:
         succeeded = do_request()
+
 
 def merge(pr_url):
     """ Merge the given pull request...locally """
