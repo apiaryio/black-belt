@@ -79,6 +79,8 @@ TODO:
 * Comment the associated Trello card
 
 
+.. _deploy-pr:
+
 Deploying Pull Requests
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -96,5 +98,5 @@ This:
 #. Asks for deploy confirmation
 #. Notify others on HipChat about deploy
 #. Deploys
-#. TODO: If it can figure out related Trello card, moves it to "Deployed by" column
+#. If it can figure out related Trello card (looks for "Pull request for <link>"), moves it to "Deployed by" column
 #. Does *not* bring beer yet, unfortunately

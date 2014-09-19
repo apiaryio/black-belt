@@ -9,8 +9,14 @@ import webbrowser
 import click
 import requests
 
+from .apis.trello import Trello as TrelloApi
 from .config import config
-from .handle_trello import get_current_working_ticket, pause_ticket, comment_ticket
+from .handle_trello import (
+    get_current_working_ticket,
+    get_ticket_ready,
+    comment_ticket,
+    move_to_deployed
+)
 from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
@@ -18,6 +24,8 @@ from .version import VERSION
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
 UA_STRING = "black-belt/%s" % VERSION
+
+PR_PHRASE_PREFIX="Pull request for"
 
 
 def get_github_repo():
@@ -57,12 +65,16 @@ def pull_request():
         raise ValueError("Current git origin not on github.com; aborting")
 
     ticket = get_current_working_ticket()
+    md_link = "[%(name)s](%(url)s)" % ticket
 
     pr_description = """
 
-Pull request for [%(name)s](%(url)s).
+%(phrase)s %(link)s.
 
-    """ % ticket
+    """ % {
+        'phrase': PR_PHRASE_PREFIX,
+        'link': md_link
+    }
 
     repo_info = get_remote_repo_info(repo)
 
@@ -85,7 +97,7 @@ Pull request for [%(name)s](%(url)s).
         print r.json()
         raise ValueError("PR ended with status code %s: %s" % (r.status_code, r))
 
-    pause_ticket(ticket)
+    get_ticket_ready(ticket)
 
     pr_info = r.json()
 
@@ -104,11 +116,12 @@ Pull request for [%(name)s](%(url)s).
 def get_current_branch():
     return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
 
+
 def get_current_sha():
     return check_output(['git', 'rev-parse', 'HEAD']).strip()
 
+
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
-    
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
     succeeded = False
@@ -132,6 +145,7 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
     while not succeeded:
         succeeded = do_request()
+
 
 def merge(pr_url):
     """ Merge the given pull request...locally """
@@ -199,8 +213,16 @@ def merge(pr_url):
         'sha': merge_sha,
         'owner': pr_info['owner'],
         'name': pr_info['name'],
-        'number': pr_info['number']
+        'number': pr_info['number'],
+        'description': pr['body']
     }
+
+def get_pr_ticket_id(description):
+    match = re.search(PR_PHRASE_PREFIX+ ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
+    if not match or not 'id' in match.groupdict():
+        raise ValueError("Can't find URL in the PR description")
+
+    return match.groupdict()['id']
 
 
 def deploy(pr_url):
@@ -220,6 +242,16 @@ def deploy(pr_url):
     )
 
     if ci_info['failed']:
+        if exists('/usr/bin/osascript'):
+            message = "Tests FAILED for %s" % merge_info['sha']
+            try:
+                check_call(['/usr/bin/osascript', '-e', "display notification \"%(message)s\" with title \"%(title)s\"" % {
+                    'message': message,
+                    'title': 'Apiary Deployment'
+                }])
+            except Exception:
+                print "[Can't notify user using osascript]"
+
         raise ValueError("Circle build failed. TODO: Auto retry.")
 
     if exists('/usr/bin/osascript'):
@@ -240,3 +272,9 @@ def deploy(pr_url):
     sleep(15)
 
     check_output(['grunt', 'deploy-slug'])
+
+    comment = "Deployed by me with version %s. Please verify it works." % merge_info['sha']
+
+    ticket_id = get_pr_ticket_id(merge_info['description'])
+    move_to_deployed(card_id=ticket_id, comment=comment)
+
