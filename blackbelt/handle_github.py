@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 import json
-from os.path import exists
 import re
-from subprocess import check_output, check_call
+from subprocess import check_output
 from time import sleep
 import webbrowser
 
@@ -20,6 +19,7 @@ from .handle_trello import (
 from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
+from .notify import notify
 
 GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
@@ -242,28 +242,9 @@ def deploy(pr_url):
     )
 
     if ci_info['failed']:
-        if exists('/usr/bin/osascript'):
-            message = "Tests FAILED for %s" % merge_info['sha']
-            try:
-                check_call(['/usr/bin/osascript', '-e', "display notification \"%(message)s\" with title \"%(title)s\"" % {
-                    'message': message,
-                    'title': 'Apiary Deployment'
-                }])
-            except Exception:
-                print "[Can't notify user using osascript]"
-
+        notify('Apiary Deployment', "Tests FAILED for %s" % merge_info['sha'])
         raise ValueError("Circle build failed. TODO: Auto retry.")
-
-    if exists('/usr/bin/osascript'):
-        message = "New version %s ready for deploy" % merge_info['sha']
-        try:
-            check_call(['/usr/bin/osascript', '-e', "display notification \"%(message)s\" with title \"%(title)s\"" % {
-                'message': message,
-                'title': 'Apiary Deployment'
-            }])
-        except Exception:
-            print "[Can't notify user using osascript]"
-
+    notify('Apiary Deployment', "New version %s ready for deploy" % merge_info['sha'])
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
