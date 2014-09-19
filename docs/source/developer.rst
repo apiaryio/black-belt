@@ -79,6 +79,8 @@ TODO:
 * Comment the associated Trello card
 
 
+.. _deploy-pr:
+
 Deploying Pull Requests
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
