@@ -1,6 +1,6 @@
 import json
 import requests
-from urllib import quote_plus
+from urllib import quote, quote_plus
 
 from blackbelt.config import config
 from blackbelt.errors import ConfigurationError
@@ -74,7 +74,7 @@ class Trello(object):
     ### Cards
     def get_card(self, card_id=None, card_url=None):
         if card_url:
-            card_id = urllib.quote(card_url)
+            card_id = quote(card_url)
 
         return self.do_request("/cards/%s" % card_id)
 
@@ -110,7 +110,7 @@ class Trello(object):
     def comment_card(self, card_id, comment):
         self.do_request("/cards/%s/actions/comments" % card_id, method='post', data={'text': comment})
 
-    def add_card_member(card_id, member_id):
+    def add_card_member(self, card_id, member_id):
         self.do_request(
             "/cards/%s/members" % card_id,
             method='post',
@@ -119,7 +119,7 @@ class Trello(object):
             }   
         )
 
-    def label_card(card_id, label):
+    def label_card(self, card_id, label):
         self.do_request(
             "/cards/%s/labels" % card_id,
             method='post',
@@ -147,7 +147,7 @@ class Trello(object):
     def get_checklist_items(self, checklist_id):
         return self.do_request('/checklists/%s/checkItems' % checklist_id)
 
-    def delete_checklist_item(checklist_id, checklist_item_id):
+    def delete_checklist_item(self, checklist_id, checklist_item_id):
         return self.do_request(
             "/checklists/%s/checkItems/%s" % (checklist_id, checklist_item_id),
             method='delete'

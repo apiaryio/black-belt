@@ -174,7 +174,7 @@ def get_conversion_items(api, card_list, story_card, story_list):
         lists = ', '.join([i['name'] for i in card_list])
         raise ValueError("Cannot find checklist to convert. Please provide a correct --story-list parameter. Available lists are: %s" % lists)
 
-    list_items = api.get_checklist_items(list_id=todo_list['id'])
+    list_items = api.get_checklist_items(checklist_id=todo_list['id'])
     return (todo_list, [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')])
 
 
@@ -192,8 +192,9 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
     if match:
         story_card = match.groupdict()['id']
 
-    story_card = api.get_cards(card_url=story_card)
-    card_list = api.get_card_checklist(card_id=story_card['id'])
+    story_card = api.get_card(card_url=story_card)
+    #FIXME: list vs. lists
+    card_list = api.get_card_checklists(card_id=story_card['id'])
 
     if not owner:
         owner = api.get_myself()
@@ -212,7 +213,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
             list_id=work_queue['id']
         )
 
-        api.create_item(api=api, checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
+        api.create_item(checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
 
         api.delete_checklist_item(checklist_id=todo_list['id'], checklist_item_id=item['id'])
 
