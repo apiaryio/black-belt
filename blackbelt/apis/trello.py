@@ -46,9 +46,9 @@ class Trello(object):
         return json.loads(response.content)
 
     ### Users & Tokens
-    def get_token_url(self, app_name, expires='365days'):
+    def get_token_url(self, app_name, expires='30days'):
         """ Return URL for retrieving access token """
-        return 'https://trello.com/1/authorize?key=%(key)s&name=%(name)s&expiration=%(expiration)s&response_type=token&scope=%(scope)s' % {
+        return 'https://trello.com/1/authorize?key=%(key)s&name=%(name)s&expiration=%(expires)s&response_type=token&scope=%(scope)s' % {
             'key': self.API_KEY,
             'name': quote_plus(self.APP_NAME),
             'expires': expires,
@@ -152,4 +152,3 @@ class Trello(object):
             "/checklists/%s/checkItems/%s" % (checklist_id, checklist_item_id),
             method='delete'
         )
-
