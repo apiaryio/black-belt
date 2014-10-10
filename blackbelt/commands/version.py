@@ -1,10 +1,7 @@
 import click
 
-from blackbelt.version import (
-    get_version
-)
-
+from blackbelt.version import VERSION
 
 @click.group(invoke_without_command=True, help='Version')
 def cli():
-  print get_version()
+  print VERSION
