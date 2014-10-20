@@ -2,7 +2,13 @@
 
 Black belt is collection of scripts, tools and guidelines used for developing projects The Apiary Way.
 
-## Development Installation
+
+## Installation & Usage
+
+Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org/). 
+
+
+## If you want to develop black-belt...
 
 `virtualenv` assumed (`sudo pip install virtualenv`)
 
@@ -15,14 +21,14 @@ paver develop
 paver test
 ```
 
-## Testing
+### Testing
 
 `paver test`
 
 If you ran `bb init` and you want to do "discovery testing" with the integration tests,
 set `FORCE_DISCOVERY`environmental variable to `1`.
 
-## Release
+### Release
 
 When the time is right, run `paver bump`. 
 
@@ -32,7 +38,3 @@ After it, just call `paver release` and enjoy your PyPI.
 
 Note: GPG must be properly configured for usage with `git tag -s` and you must be project maintainer on PyPI.
 
-
-## Installation & Usage
-
-Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org/). 
