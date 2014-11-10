@@ -1,3 +1,4 @@
+import datetime
 import re
 from subprocess import check_output
 import webbrowser
@@ -298,3 +299,20 @@ def move_to_deployed(card_id, comment=None):
             api.move_card(card_id=card_id, column_id=deployed['id'])
             if comment:
                 api.comment_card(card_id=card_id, comment=comment)
+
+
+def next_week():
+    sunday = datetime.date.today() + datetime.timedelta(days=datetime.date.today().weekday() + 6)
+    sunday = sunday.isoformat()
+
+    api = get_api()
+    api.add_column(
+        board_id=config['trello']['work_board_id'],
+        name="Deployed by %s" % sunday,
+        position=5
+    )
+    api.add_column(
+        board_id=config['trello']['work_board_id'],
+        name="Verified by %s" % sunday,
+        position=6
+    )

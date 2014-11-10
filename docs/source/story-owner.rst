@@ -31,3 +31,12 @@ Clean sweep
 All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
 
 	bb t migrate-label --label="Product: Example" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
+
+
+-------------------------
+Get ready for next week
+-------------------------
+
+Create new columns on the :term:`Work Board`: `Deployed by <sunday>` and `Verified by <sunday>`
+
+	bb t next-week
