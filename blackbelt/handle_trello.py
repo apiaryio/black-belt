@@ -94,7 +94,7 @@ def get_current_working_ticket(t_url):
     else:
         url_cards = [card for card in my_cards if card['url'] == t_url]
 
-        if url_cards.count() > 0:
+        if len(url_cards) > 0:
             work_card = url_cards[0]
 
 

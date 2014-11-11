@@ -64,7 +64,7 @@ def pull_request(t_url):
     if 'github.com' not in repo:
         raise ValueError("Current git origin not on github.com; aborting")
 
-    ticket = get_current_working_ticket()
+    ticket = get_current_working_ticket(t_url)
     md_link = "[%(name)s](%(url)s)" % ticket
 
     pr_description = """
