@@ -64,7 +64,7 @@ def get_next_todo_card():
     return my_cards[0]
 
 
-def get_current_working_ticket():
+def get_current_working_ticket(t_url):
     api = get_api()
 
     column = get_column(name=config['trello']['work_column_name'])
@@ -79,16 +79,24 @@ def get_current_working_ticket():
     if len(my_cards) < 1:
         raise ValueError("No working card; aborting.")
 
-    if len(my_cards) == 1:
-        work_card = my_cards[0]
+    if not t_url:
 
-    if len(my_cards) > 1:
-        for card in my_cards:
-            if len(card['idMembers']) == 1:
-                if not work_card:
-                    work_card = card
-                else:
-                    raise ValueError("Multiple work cards; cannot decide, aborting")
+        if len(my_cards) == 1:
+            work_card = my_cards[0]
+
+        if len(my_cards) > 1:
+            for card in my_cards:
+                if len(card['idMembers']) == 1:
+                    if not work_card:
+                        work_card = card
+                    else:
+                        raise ValueError("Multiple work cards; cannot decide, aborting")
+    else:
+        url_cards = [card for card in my_cards if card['url'] == t_url]
+
+        if url_cards.count() > 0:
+            work_card = url_cards[0]
+
 
     if not work_card:
         raise ValueError("No work card for me; aborting")

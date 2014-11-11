@@ -57,7 +57,7 @@ def get_username():
     return res.json()['login']
 
 
-def pull_request():
+def pull_request(t_url):
     branch = get_current_branch()
     repo = get_github_repo()
 

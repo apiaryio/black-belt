@@ -13,8 +13,9 @@ def cli():
 
 
 @cli.command()
-def pr():
-    pull_request()
+@click.argument('t_url')
+def pr(t_url):
+    pull_request(t_url)
 
 
 @cli.command()
