@@ -13,9 +13,9 @@ def cli():
 
 
 @cli.command()
-@click.argument('t_url', required=False)
-def pr(t_url):
-    pull_request(t_url)
+@click.argument('card_url', required=False)
+def pr(card_url):
+    pull_request(card_url)
 
 
 @cli.command()
