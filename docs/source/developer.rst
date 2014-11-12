@@ -8,7 +8,7 @@ Developer
 
 Those live on the :term:`Work Board`.
 
-Those are the task :term:`Developer` may want to perform. 
+Those are the task :term:`Developer` may want to perform.
 
 .. _development:
 
@@ -41,12 +41,13 @@ Issuing Pull Request
 
 Send current branch for code review with::
 
-	bb gh pr
+	bb gh pr [CARD_URL]
 
 This:
 
 #. Inspects current repository for branches
-#. Inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you)
+#. If CARD_URL is specified, it inspects ``Doing`` on the :term:`Work Board` for the selected working ticket, and will raise an error if ticket is not found.
+   If [CARD_URL] is not specified, it inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you)
 #. Creates a pull request that references the trello card and references the PR on the card as well
 #. Moves the card to ``Ready``
 #. Opens the browser with the PR for further editing/review
