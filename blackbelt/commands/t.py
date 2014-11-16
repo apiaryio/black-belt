@@ -3,7 +3,8 @@ import click
 from blackbelt.handle_trello import (
     migrate_label as ml,
     schedule_list as sl,
-    next_card as n
+    next_card as n,
+    next_week as nw
 )
 
 
@@ -36,3 +37,9 @@ def schedule_list(**kwargs):
 def next(**kwargs):
     """ Takes the top card from To Do queue, moves it to doing and creates proper branch """
     n(**kwargs)
+
+
+@cli.command(name='next-week')
+def next_week():
+    """ Creates new columns for this week """
+    nw()

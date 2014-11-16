@@ -152,3 +152,26 @@ class Trello(object):
             "/checklists/%s/checkItems/%s" % (checklist_id, checklist_item_id),
             method='delete'
         )
+
+    def add_column(self, board_id, name, position):
+        """ Add position^th column to the board_id. Position is 1-indexed """
+        # Position is not just an integer as in 3 for 3rd from the left,
+        # but we ultimately want our API to look act that way
+        # Therefore, find out position-1 & increment
+        columns = self.get_columns(board_id=board_id)
+
+        trello_position = 'bottom' # default
+
+        if len(columns) >= position - 1 and position > 1:
+            # -2: -1 for prev card, additional -1 because list is 0-indexed
+            # +1 for pos as we want to have it behind it
+            trello_position = columns[position - 2]['pos'] + 1
+
+        return self.do_request(
+            "/boards/%s/lists" % (board_id,),
+            method='post',
+            data={
+                'name': name,
+                'pos': trello_position
+            }
+        )
