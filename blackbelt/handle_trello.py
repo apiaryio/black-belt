@@ -77,7 +77,7 @@ def get_current_working_ticket(card_url):
     work_card = None
 
     if len(my_cards) < 1:
-        raise ValueError("No working card; aborting.")
+        raise ValueError("No working card in your DOING list; aborting.")
 
     if not card_url:
 
@@ -90,7 +90,7 @@ def get_current_working_ticket(card_url):
                     if not work_card:
                         work_card = card
                     else:
-                        raise ValueError("Multiple work cards; cannot decide, aborting")
+                        raise ValueError("Multiple available work cards; Try bb gh pr <card_url> ")
     else:
         url_cards = [card for card in my_cards if card['url'] == card_url]
 
@@ -99,7 +99,7 @@ def get_current_working_ticket(card_url):
 
 
     if not work_card:
-        raise ValueError("No work card for me; aborting")
+        raise ValueError("The specified card_url is not in your DOING list")
 
     return work_card
 
