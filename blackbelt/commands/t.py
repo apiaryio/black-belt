@@ -4,7 +4,8 @@ from blackbelt.handle_trello import (
     migrate_label as ml,
     schedule_list as sl,
     next_card as n,
-    next_week as nw
+    next_week as nw,
+    open_current_working_ticket as cc
 )
 
 
@@ -12,6 +13,10 @@ from blackbelt.handle_trello import (
 def cli():
     pass
 
+@cli.command(name='curcard')
+def curcard():
+    """ Open current doing card in browser """
+    cc()
 
 @cli.command(name='migrate-label')
 @click.option('--label', default='', help='Label to migrate away')

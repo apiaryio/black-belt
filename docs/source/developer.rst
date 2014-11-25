@@ -16,6 +16,13 @@ Those are the task :term:`Developer` may want to perform.
 Development as usual
 ------------------------------------
 
+Open current task
+^^^^^^^^^^^^^^^^^
+
+Open current Trello card in browser::
+
+  bb t curcard
+
 .. _next-card:
 
 Move on to the next task

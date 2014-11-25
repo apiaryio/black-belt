@@ -96,6 +96,9 @@ def get_current_working_ticket():
 
     return work_card
 
+def open_current_working_ticket():
+    ticket = get_current_working_ticket()
+    webbrowser.open(ticket['url'])
 
 def get_ticket_ready(ticket):
     api = get_api()
