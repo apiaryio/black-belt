@@ -40,3 +40,14 @@ Get ready for next week
 Create new columns on the :term:`Work Board`: `Deployed by <sunday>` and `Verified by <sunday>`
 
 	bb t next-week
+
+
+-------------------------
+Verify a story
+-------------------------
+
+Looks through a checklists on :term:`Story`, see whether incomplete items refer to a card and whether the card is in `Deployed by <sunday>` and `Verified by <sunday>` column.
+
+If so, ask to open them and then to verify them (meaning ticking the checkbox).
+
+	bb t verify http://trello.com/c/story

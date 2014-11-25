@@ -5,7 +5,8 @@ from blackbelt.handle_trello import (
     schedule_list as sl,
     next_card as n,
     next_week as nw,
-    open_current_working_ticket as cc
+    open_current_working_ticket as cc,
+    verify as v
 )
 
 
@@ -13,10 +14,12 @@ from blackbelt.handle_trello import (
 def cli():
     pass
 
+
 @cli.command(name='curcard')
 def curcard():
     """ Open current doing card in browser """
     cc()
+
 
 @cli.command(name='migrate-label')
 @click.option('--label', default='', help='Label to migrate away')
@@ -48,3 +51,11 @@ def next(**kwargs):
 def next_week():
     """ Creates new columns for this week """
     nw()
+
+
+@cli.command()
+@click.argument('story_card')
+def verify(**kwargs):
+    """ Verify given story card  """
+    #TODO: Scan through all cards in the "Being worked on" column on story board
+    v(**kwargs)
