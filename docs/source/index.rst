@@ -19,6 +19,18 @@ With that, you should have ``bb`` command. Run interactive ``bb init`` and follo
 
 Retrieved tokens and configuration is stored in ``~/.blackbelt``. Format is now just dumped JSON, don't rely on it; it's probably going to change in the future.
 
+If you are using ``bash``, you want to enable autocompletion. You can try it with::
+
+	eval "$( _BB_COMPLETE=source bb)"
+
+and if it's working properly, put it into your :file:`~/.bashrc`.
+
+	echo '_BB_COMPLETE=source bb > /tmp/_black_belt_autocompletion.sh'  >> ~/.bashrc
+	echo 'source /tmp/_black_belt_autocompletion.sh' >> ~/.bashrc
+
+
+See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more information.
+
 
 --------------
 Structure
