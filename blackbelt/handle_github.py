@@ -57,14 +57,14 @@ def get_username():
     return res.json()['login']
 
 
-def pull_request():
+def pull_request(card_url):
     branch = get_current_branch()
     repo = get_github_repo()
 
     if 'github.com' not in repo:
         raise ValueError("Current git origin not on github.com; aborting")
 
-    ticket = get_current_working_ticket()
+    ticket = get_current_working_ticket(card_url)
     md_link = "[%(name)s](%(url)s)" % ticket
 
     pr_description = """
