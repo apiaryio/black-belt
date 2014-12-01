@@ -3,6 +3,8 @@ import re
 from subprocess import check_output
 import webbrowser
 
+import click
+
 #from blackbelt.apis.trello import *
 from blackbelt.config import config
 
@@ -20,6 +22,7 @@ STORY_CARD_TODO_LIST_NAMES = [
 TODO_QUEUE_NAME = "To Do Queue"
 DEPLOY_QUEUE_NAME = "Ready"
 DEPLOYED_PREFIX = "Deployed by"
+VERIFIED_PREFIX = "Verified by"
 
 
 def get_token_url():
@@ -327,3 +330,62 @@ def next_week():
         name="Verified by %s" % sunday,
         position=6
     )
+
+
+def verify(story_card):
+    api = get_api()
+
+    story_card = api.get_card(card_url=story_card)
+    checklists = api.get_card_checklists(card_id=story_card['id'])
+
+    # We actually don't care how the checklists are structured, only about the card links
+    checklist_cards = []
+    index = -1
+    for l in checklists:
+        index += 1
+        for list_item in l['checkItems']:
+            # We accept the first link in the checklist item, we don't need one only
+            match = re.match("^.*https://trello.com/c/(?P<id>\w+)/?(.*)", list_item['name'])
+            if match:
+                if list_item['state'] == u'incomplete':
+                    list_item['_black_belt'] = {
+                        'card_id': match.groupdict()['id'],
+                        'checklist_index': index, # Not needed now, but preserved for future list updatess
+                        'checklist_id': l['id']
+                    }
+                    checklist_cards.append(list_item)
+
+                elif list_item['state'] != u'complete':
+                    print "Unknown checklist state %s, skipping" % list_item['state']
+    
+    # We have list of cards to check, go through them and discover whether
+    # they are Deployed / Verified
+    COLUMN_CACHE = {}
+
+    items_done = []
+    for item in checklist_cards:
+        work_card = api.get_card(card_id=item['_black_belt']['card_id'])
+        column_id = work_card['idList']
+
+        if column_id not in COLUMN_CACHE:
+            COLUMN_CACHE[column_id] = api.get_column(column_id)
+
+        name = COLUMN_CACHE[column_id]['name']
+        if name.startswith(DEPLOYED_PREFIX) or name.startswith(VERIFIED_PREFIX):
+            item['_black_belt']['name'] = work_card['name']
+            item['_black_belt']['url'] = work_card['url']
+            items_done.append(item)
+        else:
+            pass
+            #print "%s still not done" % work_card['name'].encode('utf-8')
+
+    # Go through the done items, ask for review and ask for completing them
+    for item in items_done:
+        if click.confirm("Do you want to show card %s?" % item['_black_belt']['name'], default=True):
+            webbrowser.open(item['_black_belt']['url'])
+        if click.confirm("Do you want to check it as verified?"):
+            api.check_item(
+                checklist_id=item['_black_belt']['checklist_id'],
+                item_id=item['id'],
+                card_id=story_card['id']
+            )

@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 from urllib import quote, quote_plus
 
@@ -45,6 +46,15 @@ class Trello(object):
         response.raise_for_status()
         return json.loads(response.content)
 
+    def get_card_id(self, card_url):
+        # Trailing .* to accept longlings as well. Brittle, but that's how they work
+        # See https://twitter.com/almadcz/status/537187876191350784
+        match = re.match("^https://trello.com/c/(?P<id>\w+)/?(.*)", card_url)
+        if match:
+            return match.groupdict()['id']
+        else:
+            return quote(card_url)
+
     ### Users & Tokens
     def get_token_url(self, app_name, expires='30days'):
         """ Return URL for retrieving access token """
@@ -70,12 +80,13 @@ class Trello(object):
     def get_columns(self, board_id):
         return self.do_request("/boards/%s/lists" % board_id)
 
+    def get_column(self, column_id):
+        return self.do_request("/lists/%s" % column_id)
 
     ### Cards
     def get_card(self, card_id=None, card_url=None):
-        if card_url:
-            card_id = quote(card_url)
-
+        if card_url and not card_id:
+            card_id = self.get_card_id(card_url)
         return self.do_request("/cards/%s" % card_id)
 
     def get_cards(self, column_id):
@@ -138,6 +149,24 @@ class Trello(object):
             data={
                 'name': name,
                 'post': pos
+            }
+        )
+
+    def check_item(self, card_id, checklist_id, item_id):
+        """ Mark item in the given checklist as complete """
+        # OK, WTF
+        # This is kinda underdocumented, method is not present in API,
+        # but inspecting the requests in live trello says yes, they do
+        # https://trello.com/1/cards/5352e7118793950e77eb1c31/checklist/5352e75978962c0c7778f601/checkItem/5352fb5abb1fb4ca20b7be44
+        self.do_request(
+            "/cards/%(card_id)s/checklist/%(checklist_id)s/checkItem/%(item_id)s" % {
+                'checklist_id': checklist_id,
+                'item_id': item_id,
+                'card_id': card_id
+            },
+            method='put',
+            data={
+                'state': 'complete'
             }
         )
 
