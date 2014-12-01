@@ -229,7 +229,7 @@ def deploy(pr_url):
     """ Deploy the given pull request to production """
     merge_info = merge(pr_url)
 
-    post_message("@here Merged PR #%(number)s; going to deploy once tests are passing..." % merge_info)
+    post_message("@here Merged PR #%(number)s: %(name)s" % merge_info)
 
     check_output(['grunt', 'create-slug'])
 
