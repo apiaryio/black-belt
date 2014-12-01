@@ -208,13 +208,22 @@ def merge(pr_url):
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
     print "#%(number)s merged!" % pr_info
+    post_message("@here [%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
+        'owner': pr_info['owner'],
+        'name': pr_info['name'],
+        'number': pr_info['number'],
+        'title': pr['title'],
+        'comments': pr['comments'],
+        'commits': pr['commits']
+    })
 
     return {
         'sha': merge_sha,
         'owner': pr_info['owner'],
         'name': pr_info['name'],
         'number': pr_info['number'],
-        'description': pr['body']
+        'description': pr['body'],
+        'title': pr['title']
     }
 
 def get_pr_ticket_id(description):
@@ -228,8 +237,6 @@ def get_pr_ticket_id(description):
 def deploy(pr_url):
     """ Deploy the given pull request to production """
     merge_info = merge(pr_url)
-
-    post_message("@here Merged PR #%(number)s: %(name)s" % merge_info)
 
     check_output(['grunt', 'create-slug'])
 
@@ -248,7 +255,7 @@ def deploy(pr_url):
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
-    post_message("@here deploy in 15 seconds")
+    post_message("@here Deploying %(title)s in 15 seconds" % merge_info)
 
     sleep(15)
 
