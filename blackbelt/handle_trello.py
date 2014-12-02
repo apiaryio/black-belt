@@ -101,15 +101,16 @@ def get_current_working_ticket(card_url):
         if len(url_cards) > 0:
             work_card = url_cards[0]
 
-
     if not work_card:
         raise ValueError("The specified card_url is not in your DOING list")
 
     return work_card
 
+
 def open_current_working_ticket():
     ticket = get_current_working_ticket()
     webbrowser.open(ticket['url'])
+
 
 def get_ticket_ready(ticket):
     api = get_api()
@@ -344,20 +345,20 @@ def verify(story_card):
     for l in checklists:
         index += 1
         for list_item in l['checkItems']:
-            # We accept the first link in the checklist item, we don't need one only
+            # We accept the first link in the checklist item
             match = re.match("^.*https://trello.com/c/(?P<id>\w+)/?(.*)", list_item['name'])
             if match:
                 if list_item['state'] == u'incomplete':
                     list_item['_black_belt'] = {
                         'card_id': match.groupdict()['id'],
-                        'checklist_index': index, # Not needed now, but preserved for future list updatess
+                        'checklist_index': index,  # Not needed now, but preserved for future list updates
                         'checklist_id': l['id']
                     }
                     checklist_cards.append(list_item)
 
                 elif list_item['state'] != u'complete':
                     print "Unknown checklist state %s, skipping" % list_item['state']
-    
+
     # We have list of cards to check, go through them and discover whether
     # they are Deployed / Verified
     COLUMN_CACHE = {}

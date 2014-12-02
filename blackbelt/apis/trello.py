@@ -49,7 +49,7 @@ class Trello(object):
     def get_card_id(self, card_url):
         # Trailing .* to accept longlings as well. Brittle, but that's how they work
         # See https://twitter.com/almadcz/status/537187876191350784
-        match = re.match("^https://trello.com/c/(?P<id>\w+)/?(.*)", card_url)
+        match = re.match(r"^https://trello.com/c/(?P<id>\w+)/?(.*)", card_url)
         if match:
             return match.groupdict()['id']
         else:
