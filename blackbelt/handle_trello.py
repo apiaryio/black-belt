@@ -68,7 +68,7 @@ def get_next_todo_card():
     return my_cards[0]
 
 
-def get_current_working_ticket(card_url):
+def get_current_working_ticket(card_url=None):
     api = get_api()
 
     column = get_column(name=config['trello']['work_column_name'])
