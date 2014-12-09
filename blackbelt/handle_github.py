@@ -101,7 +101,7 @@ def pull_request(card_url):
 
     pr_info = r.json()
 
-    ticket_comment = "Sending [pull request #%(number)s](%(html_url)s)" % pr_info
+    ticket_comment = "Sending [pull request #%(number)s](%(html_url)s)." % pr_info
 
     comment_ticket(ticket, ticket_comment)
 
