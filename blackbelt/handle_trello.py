@@ -124,6 +124,9 @@ def comment_ticket(ticket, comment):
 
 
 def migrate_label(label, board, board_to, column, column_to):
+    """
+    All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
+    """
     api = get_api()
 
     if column:

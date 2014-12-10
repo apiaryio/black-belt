@@ -58,6 +58,15 @@ def get_username():
 
 
 def pull_request(card_url):
+    """
+    Sends current branch for code review.
+
+    #. Inspects current repository for branches
+    #. If CARD_URL parameter is not specified, it inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you). If it is specified, it inspects ``Doing`` on the :term:`Work Board` for the selected working ticket, and will raise an error if ticket is not found.
+    #. Creates a pull request that references the trello card and references the PR on the card as well
+    #. Moves the card to ``Ready``
+    #. Opens the browser with the PR for further editing/review
+    """
     branch = get_current_branch()
     repo = get_github_repo()
 
@@ -147,7 +156,19 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
 
 def merge(pr_url):
-    """ Merge the given pull request...locally """
+    """
+    This merges PR on Github into master with::
+
+    #. Inspects the current repository and the pull request
+    #. Switches to master and brings it up to date
+    #. Merges the PR locally and pushes to master
+    #. Deletes the merged branch from the remote repository/github
+
+    TODO:
+
+    * Comment the associated Trello card
+
+    """
 
     pr_info = get_pr_info(pr_url)
 
@@ -236,7 +257,21 @@ def get_pr_ticket_id(description):
 
 
 def deploy(pr_url):
-    """ Deploy the given pull request to production """
+    """
+    Deploys PR to production
+
+    #. Does :ref:`pr-merge`
+    #. Inform people on HipChat about the merge and the deployment intent
+    #. Prepares Heroku deploy slugs using ``grunt create-slug``
+    #. Waits for CircleCI tests to pass
+    #. TODO: If they fail, asks for retry
+    #. Asks for deploy confirmation
+    #. Notify others on HipChat about deploy
+    #. Deploys
+    #. If it can figure out related Trello card (looks for "Pull request for <link>"), moves it to "Deployed by" column
+    #. Does *not* bring beer yet, unfortunately
+
+    """
     merge_info = merge(pr_url)
 
     check_output(['grunt', 'create-slug'])

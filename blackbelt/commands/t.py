@@ -29,7 +29,7 @@ def curcard():
 @click.option('--column-to', help='Column to migrate to')
 def migrate_label(*args, **kwargs):
     """
-    All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
+    Usage::
 
         bb t migrate-label --label="Product: Example" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
     """
@@ -43,7 +43,7 @@ def migrate_label(*args, **kwargs):
 @click.argument('story_card')
 def schedule_list(**kwargs):
     """
-    This helps you to schedule a story for development::
+    Usage::
 
         bb t schedule-list [--owner="TrelloUserName" [--story-list="Checklist Name"] [--label="color"] http://trello.com/c/story-card-shortlink
 
