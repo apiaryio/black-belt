@@ -3,7 +3,7 @@ from urllib import quote
 
 import requests
 
-from .config import config
+from blackbelt.config import config
 
 
 class HipChat(object):
