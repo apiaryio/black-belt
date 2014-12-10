@@ -8,7 +8,6 @@ import webbrowser
 import click
 import requests
 
-from .apis.trello import Trello as TrelloApi
 from .config import config
 from .handle_trello import (
     get_current_working_ticket,
@@ -25,7 +24,7 @@ GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 
 UA_STRING = "black-belt/%s" % VERSION
 
-PR_PHRASE_PREFIX="Pull request for"
+PR_PHRASE_PREFIX = "Pull request for"
 
 
 def get_github_repo():
@@ -37,6 +36,7 @@ def get_remote_repo_info(github_repo_info):
     if not match:
         raise ValueError("Cannot parse repo info. Bad remote?")
     return match.groupdict()
+
 
 def get_pr_info(pr_url):
     match = re.match(r".*github.com/(?P<owner>\S+)/{1}(?P<name>\S+)/pull/{1}(?P<number>\d+).*$", pr_url)
@@ -142,7 +142,6 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
         else:
             return True
 
-
     while not succeeded:
         succeeded = do_request()
 
@@ -177,8 +176,8 @@ def merge(pr_url):
         gh_repo['clone_url']
     ]:
         raise ValueError("The pull request is for the repository %s, while your origin is set up for %s" % (
-                gh_repo['git_url'], get_github_repo()
-            ))
+            gh_repo['git_url'], get_github_repo()
+        ))
 
     sha = pr['head']['sha']
 
@@ -208,17 +207,28 @@ def merge(pr_url):
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
     print "#%(number)s merged!" % pr_info
+    post_message("@here [%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
+        'owner': pr_info['owner'],
+        'name': pr_info['name'],
+        'number': pr_info['number'],
+        'title': pr['title'],
+        'comments': pr['comments'],
+        'commits': pr['commits']
+    })
 
     return {
         'sha': merge_sha,
         'owner': pr_info['owner'],
         'name': pr_info['name'],
         'number': pr_info['number'],
-        'description': pr['body']
+        'description': pr['body'],
+        'html_url': pr['html_url'],
+        'title': pr['title']
     }
 
+
 def get_pr_ticket_id(description):
-    match = re.search(PR_PHRASE_PREFIX+ ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
+    match = re.search(PR_PHRASE_PREFIX + ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
     if not match or not 'id' in match.groupdict():
         raise ValueError("Can't find URL in the PR description")
 
@@ -228,8 +238,6 @@ def get_pr_ticket_id(description):
 def deploy(pr_url):
     """ Deploy the given pull request to production """
     merge_info = merge(pr_url)
-
-    post_message("@here Merged PR #%(number)s; going to deploy once tests are passing..." % merge_info)
 
     check_output(['grunt', 'create-slug'])
 
@@ -246,9 +254,12 @@ def deploy(pr_url):
         raise ValueError("Circle build failed. TODO: Auto retry.")
     notify('Apiary Deployment', "New version %s ready for deploy" % merge_info['sha'])
 
+    # Insert newline
+    print ''
+
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
-    post_message("@here deploy in 15 seconds")
+    post_message("@here Deploying \"%(title)s\" in 15 seconds" % merge_info)
 
     sleep(15)
 
@@ -256,6 +267,9 @@ def deploy(pr_url):
 
     comment = "Deployed by me with version %s. Please verify it works." % merge_info['sha']
 
-    ticket_id = get_pr_ticket_id(merge_info['description'])
-    move_to_deployed(card_id=ticket_id, comment=comment)
-
+    try:
+        ticket_id = get_pr_ticket_id(merge_info['description'])
+        move_to_deployed(card_id=ticket_id, comment=comment)
+    except ValueError:
+        if click.prompt("Moving card failed. Open PR in browser?", default=True):
+            webbrowser.open(merge_info['html_url'])
