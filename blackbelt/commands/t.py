@@ -9,26 +9,32 @@ from blackbelt.handle_trello import (
     verify as v
 )
 
-from blackbelt.commands.documented_command import command
-
 
 @click.group(help='Handle Trello-related actions and integrations.')
 def cli():
     pass
 
 
-@command(name='curcard')
+@cli.command(name='curcard')
+def curcard_command(**kwargs):
+    curcard(**kwargs)
+
+
 def curcard():
     """ Open current doing card in browser """
     cc()
 
 
-@command(name='migrate-label')
+@cli.command(name='migrate-label')
 @click.option('--label', default='', help='Label to migrate away')
 @click.option('--board', help='Board to migrate from')
 @click.option('--board-to', help='Board to migrate to')
 @click.option('--column', help='Column to migrate from')
 @click.option('--column-to', help='Column to migrate to')
+def migrate_label_command(**kwargs):
+    migrate_label(**kwargs)
+
+
 def migrate_label(*args, **kwargs):
     """
     All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
@@ -38,11 +44,15 @@ def migrate_label(*args, **kwargs):
     ml(**kwargs)
 
 
-@command(name='schedule-list')
+@cli.command(name='schedule-list')
 @click.option('--story-list', help='Name of the list that should be converted to cards')
 @click.option('--owner', help='Whom to assign a created work card')
 @click.option('--label', help='Assign a label to the newly-created card. For now, label must be a color name.')
 @click.argument('story_card')
+def schedule_list_command(**kwargs):
+    schedule_list(**kwargs)
+
+
 def schedule_list(**kwargs):
     """
     This helps you to schedule a story for development::
@@ -56,13 +66,21 @@ def schedule_list(**kwargs):
     sl(**kwargs)
 
 
-@command()
+@cli.command()
+def next_command(**kwargs):
+    next(**kwargs)
+
+
 def next(**kwargs):
     """ Takes the top card from To Do queue, moves it to doing and creates proper branch """
     n(**kwargs)
 
 
-@command(name='next-week')
+@cli.command(name='next-week')
+def next_week_command(**kwargs):
+    next_week(**kwargs)
+
+
 def next_week():
     """
     Create new columns on the :term:`Work Board`: `Deployed by <sunday>` and `Verified by <sunday>`::
@@ -72,8 +90,12 @@ def next_week():
     nw()
 
 
-@command()
+@cli.command()
 @click.argument('story_card')
+def verify_command(**kwargs):
+    verify(**kwargs)
+
+
 def verify(**kwargs):
     """
     Looks through a checklists on :term:`Story`, see whether incomplete items refer to a card and whether the card is in `Deployed by <sunday>` and `Verified by <sunday>` column.
