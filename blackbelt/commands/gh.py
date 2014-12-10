@@ -25,8 +25,7 @@ def pr(card_url):
     This:
 
     #. Inspects current repository for branches
-    #. If CARD_URL parameter is not specified, it inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you)
-        If CARD_URL parameter is specified, it inspects ``Doing`` on the :term:`Work Board` for the selected working ticket, and will raise an error if ticket is not found.
+    #. If CARD_URL parameter is not specified, it inspects ``Doing`` on the :term:`Work Board` for the current working ticket (you should have only one working ticket in ``Doing`` that is assigned only to you). If it is specified, it inspects ``Doing`` on the :term:`Work Board` for the selected working ticket, and will raise an error if ticket is not found.
     #. Creates a pull request that references the trello card and references the PR on the card as well
     #. Moves the card to ``Ready``
     #. Opens the browser with the PR for further editing/review
