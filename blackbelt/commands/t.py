@@ -9,21 +9,19 @@ from blackbelt.handle_trello import (
     verify as v
 )
 
-from blackbelt.commands.documented_command import command
-
 
 @click.group(help='Handle Trello-related actions and integrations.')
 def cli():
     pass
 
 
-@command(name='curcard')
+@cli.command(name='curcard')
 def curcard():
     """ Open current doing card in browser """
     cc()
 
 
-@command(name='migrate-label')
+@cli.command(name='migrate-label')
 @click.option('--label', default='', help='Label to migrate away')
 @click.option('--board', help='Board to migrate from')
 @click.option('--board-to', help='Board to migrate to')
@@ -38,7 +36,7 @@ def migrate_label(*args, **kwargs):
     ml(**kwargs)
 
 
-@command(name='schedule-list')
+@cli.command(name='schedule-list')
 @click.option('--story-list', help='Name of the list that should be converted to cards')
 @click.option('--owner', help='Whom to assign a created work card')
 @click.option('--label', help='Assign a label to the newly-created card. For now, label must be a color name.')
@@ -56,13 +54,13 @@ def schedule_list(**kwargs):
     sl(**kwargs)
 
 
-@command()
+@cli.command()
 def next(**kwargs):
     """ Takes the top card from To Do queue, moves it to doing and creates proper branch """
     n(**kwargs)
 
 
-@command(name='next-week')
+@cli.command(name='next-week')
 def next_week():
     """
     Create new columns on the :term:`Work Board`: `Deployed by <sunday>` and `Verified by <sunday>`::
@@ -72,7 +70,7 @@ def next_week():
     nw()
 
 
-@command()
+@cli.command()
 @click.argument('story_card')
 def verify(**kwargs):
     """

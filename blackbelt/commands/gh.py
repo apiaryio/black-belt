@@ -6,15 +6,13 @@ from blackbelt.handle_github import (
     deploy as do_deploy
 )
 
-from blackbelt.commands.documented_command import command
-
 
 @click.group(help='Handle github-related tasks and integrations.')
 def cli():
     pass
 
 
-@command()
+@cli.command()
 @click.argument('card_url', required=False)
 def pr(card_url):
     """
@@ -33,7 +31,7 @@ def pr(card_url):
     pull_request(card_url)
 
 
-@command()
+@cli.command()
 @click.argument('pr_url')
 def merge(pr_url):
     """
@@ -55,7 +53,7 @@ def merge(pr_url):
     do_merge(pr_url)
 
 
-@command()
+@cli.command()
 @click.argument('pr_url')
 def deploy(pr_url):
     """
