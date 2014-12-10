@@ -6,18 +6,16 @@ from blackbelt.handle_github import (
     deploy as do_deploy
 )
 
+from blackbelt.commands.documented_command import command
+
 
 @click.group(help='Handle github-related tasks and integrations.')
 def cli():
     pass
 
 
-@cli.command()
+@command()
 @click.argument('card_url', required=False)
-def pr_command(**kwargs):
-    pr(**kwargs)
-
-
 def pr(card_url):
     """
     Send current branch for code review with::
@@ -35,12 +33,8 @@ def pr(card_url):
     pull_request(card_url)
 
 
-@cli.command()
+@command()
 @click.argument('pr_url')
-def merge_command(**kwargs):
-    merge(**kwargs)
-
-
 def merge(pr_url):
     """
     Merge PR on Github into master with::
@@ -61,12 +55,8 @@ def merge(pr_url):
     do_merge(pr_url)
 
 
-@cli.command()
+@command()
 @click.argument('pr_url')
-def deploy_command(**kwargs):
-    deploy(**kwargs)
-
-
 def deploy(pr_url):
     """
     Deploy PR to production with::
