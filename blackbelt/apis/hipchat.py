@@ -48,3 +48,15 @@ class HipChat(object):
             'message': message,
             'message_format': 'text'
         })
+
+    def get_last_errors(self, room='Engine Room'):
+        url = self.get_url(
+            '/room/{room}/history/latest',
+            room=quote(room)
+        )
+
+        messages = self.request('get', url)
+
+        papertrail_messages = [m for m in messages['items'] if m['from'] == 'Papertrail']
+
+        return papertrail_messages
