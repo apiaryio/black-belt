@@ -1,9 +1,8 @@
-from nose.tools import assert_equals, assert_raises
 from nose.plugins.skip import SkipTest
 
 import os
 
-from blackbelt.hipchat import Client
+from blackbelt.apis.hipchat import HipChat
 
 """
 Integration exploratory playground for CircleCI.
@@ -15,7 +14,7 @@ class TestBuildInfoRetrieval(object):
 
     def setUp(self):
         try:
-            self.client = Client()
+            self.client = HipChat()
         except ValueError:
             raise SkipTest()
 
