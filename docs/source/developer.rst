@@ -108,3 +108,20 @@ This:
 #. Deploys
 #. If it can figure out related Trello card (looks for "Pull request for <link>"), moves it to "Deployed by" column
 #. Does *not* bring beer yet, unfortunately
+
+
+------------------------------------
+Testing
+------------------------------------
+
+.. _deploy-staging:
+
+Deploy current branch to staging with::
+
+	bb stage
+
+This:
+
+#. Discovers what the current branch is
+#. Informs others on HipChat
+#. Deploys the branch to staging using ``grunt deploy``
