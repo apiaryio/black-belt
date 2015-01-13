@@ -270,6 +270,30 @@ def deploy(pr_url):
     try:
         ticket_id = get_pr_ticket_id(merge_info['description'])
         move_to_deployed(card_id=ticket_id, comment=comment)
+        create_release(ref=merge_info['sha'], payload='', description="Deployed to production")
     except ValueError:
         if click.prompt("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
+
+def create_release(ref, payload, description):
+    """ Create release in github after deploy to production """
+
+    url = "https://api.github.com/repos/%(owner)s/%(name)s/deployments" % repo_info
+
+    body = {
+        'ref': ref,
+        'payload': payload,
+        'description': description
+    }
+
+    headers = {
+        'Authorization': "token %s" % config['github']['access_token']
+    }
+
+    r = requests.post(url, data=json.dumps(body), headers=headers)
+
+    if r.status_code != 201:
+        print r.json()
+        raise ValueError("Create github release ended with status code %s: %s" % (r.status_code, r))
+
+
