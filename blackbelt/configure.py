@@ -1,5 +1,6 @@
-from os.path import expanduser, exists
 import json
+from os.path import expanduser, exists
+import re
 import webbrowser
 
 import click
@@ -27,6 +28,33 @@ def get_token(config, token_url, group_name, address_text="Please generate a tok
     config[group_name]['access_token'] = token
 
 
+def get_trello_url(config, key, prompt, id_regexp):
+    group_name = 'trello'
+    default_value = None
+
+    url_key = key + '_id'
+
+    if group_name in config and url_key in config[group_name] and config[group_name][url_key]:
+        default_value = str(config[group_name][url_key])
+
+    value = click.prompt(
+        prompt,
+        default_value
+    )
+
+    match = re.match(id_regexp, value)
+    if match:
+        value_id = match.groupdict()['id']
+    else:
+        raise ValueError("Cannot recognize URL; doesn't match %s regexp" % id_regexp)
+
+    if group_name not in config:
+        config[group_name] = {}
+
+    config[group_name][url_key] = value
+    config[group_name][key + '_id'] = value_id
+
+
 def configure_blackbelt():
     print("Going to collect all the tokens and store them in ~/.blackbelt")
 
@@ -37,8 +65,8 @@ def configure_blackbelt():
         'github': {
             'access_token': None
         },
-        'circleci' : {
-            'access_token' : None
+        'circleci': {
+            'access_token': None
         },
         'hipchat': {
             'access_token': None
@@ -53,6 +81,22 @@ def configure_blackbelt():
         group_name='trello',
         config=config,
         token_url=handle_trello.get_token_url()
+    )
+
+    board_id_regexp = r"^https://trello\.com/b/(?P<id>\w+)/.*$"
+
+    get_trello_url(
+        config=config,
+        key='product_board',
+        prompt="Please provide an URL to your Product Board",
+        id_regexp=board_id_regexp
+    )
+
+    get_trello_url(
+        config=config,
+        key='work_board',
+        prompt="Please provide an URL to your Work Overview",
+        id_regexp=board_id_regexp
     )
 
     get_token(
@@ -72,7 +116,6 @@ def configure_blackbelt():
         config=config,
         token_url="https://apiary.hipchat.com/account/api"
     )
-
 
     with open(expanduser('~/.blackbelt'), 'w') as f:
         f.write(json.dumps(config))
