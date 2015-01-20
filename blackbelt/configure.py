@@ -32,7 +32,7 @@ def get_trello_url(config, key, prompt, id_regexp):
     group_name = 'trello'
     default_value = None
 
-    url_key = key + '_id'
+    url_key = key + '_url'
 
     if group_name in config and url_key in config[group_name] and config[group_name][url_key]:
         default_value = str(config[group_name][url_key])
