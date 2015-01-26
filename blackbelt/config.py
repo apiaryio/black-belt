@@ -27,7 +27,7 @@ except IOError:
     }
 
 # default config, overwrite/modularize
-if not 'work_board_id' in config['trello'] or config['trello']['work_board_id']:
+if not 'work_board_id' in config['trello'] or not config['trello']['work_board_id']:
     config['trello']['work_board_id'] = '1KsoiV9e'
 
 config['trello']['work_column_name'] = 'Doing'
