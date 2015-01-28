@@ -212,9 +212,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
     #FIXME: list vs. lists
     card_list = api.get_card_checklists(card_id=story_card['id'])
 
-    if not owner:
-        owner = api.get_myself()
-    else:
+    if owner:
         owner = api.get_member(member_name=owner)
 
     work_queue = get_column(TODO_QUEUE_NAME)
@@ -233,7 +231,9 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
 
         api.delete_checklist_item(checklist_id=todo_list['id'], checklist_item_id=item['id'])
 
-        api.add_card_member(card_id=card['id'], member_id=owner['id'])
+        if owner:
+            api.add_card_member(card_id=card['id'], member_id=owner['id'])
+
         if label:
             api.label_card(card_id=card['id'], label=label)
 
