@@ -16,8 +16,26 @@ With that, you should have ``bb`` command. Run interactive ``bb init`` and follo
 
 * GitHub
 * Trello
+* HipChat
 
 Retrieved tokens and configuration is stored in ``~/.blackbelt``. Format is now just dumped JSON, don't rely on it; it's probably going to change in the future.
+
+
+GitHub
+--------
+
+We are currently using personal tokens to communicate with github. When asked, please definitely select ``repo``, ``public_repo`` and ``read:org``.
+
+For future compatibility, you may select more.
+
+.. figure:: ./_static/github-scopes.png
+   :alt: Recommended settings
+   :figclass: align-center
+
+
+
+Autocompletion
+--------------
 
 If you are using ``bash``, you want to enable autocompletion. You can try it with::
 
