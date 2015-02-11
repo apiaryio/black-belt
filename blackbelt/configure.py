@@ -102,7 +102,7 @@ def configure_blackbelt():
     get_token(
         group_name='github',
         config=config,
-        token_url="https://github.com/settings/applications"
+        token_url="https://github.com/settings/tokens/new"
     )
 
     get_token(
