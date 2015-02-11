@@ -67,9 +67,9 @@ This documents focus more on intended workflow from the perspective of two roles
    glossary
 
 
-
+-------------------
 Indices and tables
-==================
+-------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
