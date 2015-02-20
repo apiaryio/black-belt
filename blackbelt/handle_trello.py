@@ -259,7 +259,7 @@ def next_card():
     if get_current_branch() != 'master':
         check_output(['git', 'checkout', 'master'])
 
-    check_output(['git', 'pull'])
+    check_output(['git', 'fetch', 'origin'])
 
     # You think you might do git checkout branch origin/branch?
     # Oh my, silly you. All of those require the origin branch to exists,
