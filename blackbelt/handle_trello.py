@@ -333,22 +333,34 @@ def next_week():
     )
 
 
-def verify(story_card):
+# Returns if all the checklist tasks are done
+def verify(story_card, deployed_prefix=DEPLOYED_PREFIX, verified_prefix=VERIFIED_PREFIX, prompt=True):
     api = get_api()
 
-    story_card = api.get_card(card_url=story_card)
+    if type(story_card) is not dict:
+        story_card = api.get_card(card_url=story_card)
+
     checklists = api.get_card_checklists(card_id=story_card['id'])
 
     # We actually don't care how the checklists are structured, only about the card links
     checklist_cards = []
     index = -1
+    total_tasks = 0
+    done_tasks = 0
+
     for l in checklists:
         index += 1
+        total_tasks += len(l['checkItems'])
+
         for list_item in l['checkItems']:
-            # We accept the first link in the checklist item
-            match = re.match("^.*https://trello.com/c/(?P<id>\w+)/?(.*)", list_item['name'])
-            if match:
-                if list_item['state'] == u'incomplete':
+            if list_item['state'] == u'complete':
+                done_tasks += 1
+                continue
+            elif list_item['state'] == u'incomplete':
+                # We accept the first link in the checklist item
+                match = re.match("^.*https://trello.com/c/(?P<id>\w+)/?(.*)", list_item['name'])
+
+                if match:
                     list_item['_black_belt'] = {
                         'card_id': match.groupdict()['id'],
                         'checklist_index': index,  # Not needed now, but preserved for future list updates
@@ -356,14 +368,11 @@ def verify(story_card):
                     }
                     checklist_cards.append(list_item)
 
-                elif list_item['state'] != u'complete':
-                    print "Unknown checklist state %s, skipping" % list_item['state']
-
     # We have list of cards to check, go through them and discover whether
     # they are Deployed / Verified
     COLUMN_CACHE = {}
-
     items_done = []
+
     for item in checklist_cards:
         work_card = api.get_card(card_id=item['_black_belt']['card_id'])
         column_id = work_card['idList']
@@ -372,9 +381,12 @@ def verify(story_card):
             COLUMN_CACHE[column_id] = api.get_column(column_id)
 
         name = COLUMN_CACHE[column_id]['name']
-        if name.startswith(DEPLOYED_PREFIX) or name.startswith(VERIFIED_PREFIX):
+
+        if name.startswith(deployed_prefix) or name.startswith(verified_prefix):
             item['_black_belt']['name'] = work_card['name']
             item['_black_belt']['url'] = work_card['url']
+
+            done_tasks += 1
             items_done.append(item)
         else:
             pass
@@ -382,11 +394,18 @@ def verify(story_card):
 
     # Go through the done items, ask for review and ask for completing them
     for item in items_done:
+        if prompt is False:
+            api.check_item(story_card['id'], item['_black_belt']['checklist_id'], item['id'])
+            continue
+
         if click.confirm("Do you want to show card %s?" % item['_black_belt']['name'], default=True):
             webbrowser.open(item['_black_belt']['url'])
+
         if click.confirm("Do you want to check it as verified?"):
             api.check_item(
                 checklist_id=item['_black_belt']['checklist_id'],
                 item_id=item['id'],
                 card_id=story_card['id']
             )
+
+    return done_tasks == total_tasks
