@@ -130,15 +130,34 @@ class Trello(object):
             }   
         )
 
-    def label_card(self, card_id, label):
+    def label_card(self, card_id, label_id):
         self.do_request(
-            "/cards/%s/labels" % card_id,
+            "/cards/%s/idLabels" % card_id,
             method='post',
             data={
-                'value': label
+                'value': label_id
             }
         )
 
+    ### Labels
+    def get_labels(self, board_id):
+        return self.do_request("/boards/%s/labels" % board_id)
+
+    def create_label(self, name, board_id):
+        # POST /labels was not working
+        return self.do_request(
+            "/boards/%s/labels" % board_id,
+            method='post',
+            data={
+                'name': name
+            }
+        )
+
+    def delete_label(self, label_id):
+        self.do_request(
+            "/labels/%s" % label_id,
+            method='delete'
+        )
 
     ### Checklists
     def create_item(self, checklist_id, name, pos):

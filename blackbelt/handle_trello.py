@@ -204,11 +204,14 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
 
     api = get_api()
 
-    match = re.match("^https\:\/\/trello\.com\/c\/(?P<id>\w+)$", story_card)
-    if match:
-        story_card = match.groupdict()['id']
+    if type(story_card) is not dict:
+        match = re.match("^https\:\/\/trello\.com\/c\/(?P<id>\w+)$", story_card)
 
-    story_card = api.get_card(card_url=story_card)
+        if match:
+            story_card = match.groupdict()['id']
+
+        story_card = api.get_card(card_url=story_card)
+
     #FIXME: list vs. lists
     card_list = api.get_card_checklists(card_id=story_card['id'])
 
@@ -227,17 +230,15 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
             list_id=work_queue['id']
         )
 
+        # FIXME: We really need to preserve the order here (>_<)
         api.create_item(checklist_id=todo_list['id'], name=card['url'], pos=item['pos'])
-
         api.delete_checklist_item(checklist_id=todo_list['id'], checklist_item_id=item['id'])
 
         if owner:
             api.add_card_member(card_id=card['id'], member_id=owner['id'])
 
         if label:
-            api.label_card(card_id=card['id'], label=label)
-
-    print "Done"
+            api.label_card(card_id=card['id'], label_id=label)
 
 
 def infer_branch_name(url):
