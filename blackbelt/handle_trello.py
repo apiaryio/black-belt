@@ -316,19 +316,23 @@ def move_to_deployed(card_id, comment=None):
                 api.comment_card(card_id=card_id, comment=comment)
 
 
-def next_week():
-    sunday = datetime.date.today() + datetime.timedelta(days=datetime.date.today().weekday() + 6)
-    sunday = sunday.isoformat()
+def next_week(final_day=None, deployed_prefix=DEPLOYED_PREFIX, verified_prefix=VERIFIED_PREFIX):
+    if final_day is None:
+        final_day = datetime.date.today() + datetime.timedelta(days=datetime.date.today().weekday() + 6)
+
+    final_day = final_day.isoformat()
 
     api = get_api()
+
     api.add_column(
         board_id=config['trello']['work_board_id'],
-        name="Deployed by %s" % sunday,
+        name="%s %s" % (deployed_prefix, final_day),
         position=5
     )
+
     api.add_column(
         board_id=config['trello']['work_board_id'],
-        name="Verified by %s" % sunday,
+        name="%s %s" % (verified_prefix, final_day),
         position=6
     )
 

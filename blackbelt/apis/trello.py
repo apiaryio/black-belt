@@ -204,3 +204,25 @@ class Trello(object):
                 'pos': trello_position
             }
         )
+
+    def rename_column(self, column_id, name):
+        """ Rename the given column """
+
+        self.do_request(
+            "/lists/%s/name" % column_id,
+            method='put',
+            data={
+                'value': name
+            }
+        )
+
+    def close_column(self, column_id):
+        """ Close the given column """
+
+        self.do_request(
+            "/lists/%s/closed" % column_id,
+            method='put',
+            data={
+                'value': 'true'
+            }
+        )

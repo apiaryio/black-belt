@@ -1,7 +1,7 @@
-import click, re
+import click, re, datetime
 from blackbelt.config import config
 
-from blackbelt.handle_trello import get_api, verify
+from blackbelt.handle_trello import get_api, verify, next_week
 
 @click.group(help='Team trello actions for sprints')
 def cli():
@@ -45,6 +45,74 @@ def blueprint_plan():
     print "Done"
 
 @cli.command(name='bs')
-def blueprint_schedule():
+def blueprint_start():
     """ Starting sprint for Team Blueprint™ """
-    pass
+    api = get_api()
+    points = 0
+
+    ##########################################
+
+    print "Preparing ..."
+
+    work_columns = api.get_columns(config['trello']['work_board_id'])
+    product_columns = api.get_columns(config['trello']['product_board_id'])
+
+    ##########################################
+
+    print "Archiving relevant columns ..."
+
+    for column in work_columns:
+        if re.match("^(Merged|Released)\\ by\\ ", column['name']):
+            api.close_column(column['id'])
+
+    ##########################################
+
+    print "Creating new columns ..."
+
+    monday = datetime.date.today()
+
+    while monday.weekday() != 0:
+        monday += datetime.timedelta(1)
+
+    friday = monday + datetime.timedelta(11)
+
+    next_week(friday, 'Merged by', 'Released by')
+
+    ##########################################
+
+    print "Retrieving the stories for next sprint ..."
+
+    next_sprint_column = None
+
+    for column in product_columns:
+        if column['name'] == 'Next Sprint':
+            next_sprint_column = column
+            break
+
+    stories = api.get_cards(next_sprint_column['id'])
+
+    for story in stories:
+        print "Scheduling tasks for '" + story['name'] + "' ..."
+
+        match = re.match("^(.*)\\ \\(([0-9]+)\\)$", story['name'])
+
+        if match:
+            points += int(match.group(2))
+
+    ##########################################
+
+    print "Magicking the labels ..."
+
+    ##########################################
+
+    print "Renaming columns ..."
+
+    api.rename_column(next_sprint_column['id'], "Sprint %s - %s (%d)" % (monday, friday, points))
+
+    ##########################################
+
+    print "Finishing ..."
+
+    api.add_column(config['trello']['product_board_id'], "Next Sprint", 6)
+
+    print "Done"
