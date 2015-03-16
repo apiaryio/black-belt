@@ -34,7 +34,8 @@ def migrate_label(*args, **kwargs):
 @cli.command(name='schedule-list')
 @click.option('--story-list', help='Name of the list that should be converted to cards')
 @click.option('--owner', help='Whom to assign a created work card')
-@click.option('--label', help='Assign a label to the newly-created card. Should be the id of the label.')
+@click.option('--label', help='Assign a label to the newly-created card. Label must be a color name or an id')
+@click.option('--is-label-id', is_flag=True, help='The given label will be treated as an id if this option is present')
 @click.argument('story_card')
 def schedule_list(**kwargs):
     """ Takes a TODO checklist on a given Story Card. Converts the items into the Work Overview Cards. """

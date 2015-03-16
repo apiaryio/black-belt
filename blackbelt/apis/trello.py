@@ -130,12 +130,12 @@ class Trello(object):
             }   
         )
 
-    def label_card(self, card_id, label_id):
+    def label_card(self, card_id, label, is_id=False):
         self.do_request(
-            "/cards/%s/idLabels" % card_id,
+            "/cards/%s/%s" % (card_id, ("labels", "idLabels")[is_id == True]),
             method='post',
             data={
-                'value': label_id
+                'value': label
             }
         )
 

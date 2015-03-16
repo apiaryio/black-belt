@@ -194,7 +194,7 @@ def get_conversion_items(api, card_list, story_card, story_list):
     return (todo_list, [c for c in list_items if c['state'] == 'incomplete' and not c['name'].startswith('https://trello.com/c/')])
 
 
-def schedule_list(story_card, story_list=None, owner=None, label=None):
+def schedule_list(story_card, story_list=None, owner=None, label=None, is_label_id=False):
     """
     Looks for Story Card, finds a list and migrate all non-card items to card,
     replacing the items with links to them.
@@ -238,7 +238,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
             api.add_card_member(card_id=card['id'], member_id=owner['id'])
 
         if label:
-            api.label_card(card_id=card['id'], label_id=label)
+            api.label_card(card_id=card['id'], label=label, is_id=is_label_id)
 
 
 def infer_branch_name(url):

@@ -22,10 +22,10 @@ def blueprint_plan():
     next_sprint_column = None
 
     for column in product_columns:
-        if re.match("^Sprint\\ (.*)\\ \\([0-9]+\\)$", column['name']):
+        if re.match(r"^Sprint (.*) \([0-9]+\)$", column['name']):
             current_sprint_column = column
 
-        if column['name'] == "Next Sprint":
+        if column['name'] == "Next Sprint Final":
             next_sprint_column = column
 
     if current_sprint_column is None:
@@ -68,7 +68,7 @@ def blueprint_start():
     print "Archiving relevant columns ..."
 
     for column in work_columns:
-        if re.match("^(Merged|Released)\\ by\\ ", column['name']):
+        if re.match(r"^(Merged|Released) by ", column['name']):
             api.close_column(column['id'])
 
     ##########################################
@@ -80,7 +80,7 @@ def blueprint_start():
     while monday.weekday() != 0:
         monday += datetime.timedelta(1)
 
-    friday = monday + datetime.timedelta(11)
+    friday = monday + datetime.timedelta(18)
 
     next_week(friday, "Merged by", "Released by")
 
@@ -102,17 +102,17 @@ def blueprint_start():
     label_for_story = {}
 
     for column in product_columns:
-        if column['name'] == "Next Sprint":
+        if column['name'] == "Next Sprint Final":
             next_sprint_column = column
             break
 
     stories = api.get_cards(next_sprint_column['id'])
 
     for story in stories:
-        match = re.match("^(.*)\\ \\(([0-9]+)\\)$", story['name'])
+        match = re.match(r"^(.*) \(([0-9]+)\)$", story['name'])
 
         if match is None:
-            raise "This is why I dislike working with regex even though they are awesome"
+            raise ValueError("This is why I dislike working with regex even though they are awesome")
 
         points += int(match.group(2))
         new_labels.append(match.group(1))
@@ -135,7 +135,7 @@ def blueprint_start():
         print "Scheduling tasks for '" + story['name'] + "' ..."
 
         label = labels[label_for_story[story['id']]]
-        schedule_list(story, "Checklist", "anybody", label['id'])
+        schedule_list(story, "Checklist", "anybody", label['id'], True)
 
     ##########################################
 
@@ -150,7 +150,7 @@ def blueprint_start():
     for label_name in deleted_labels:
         api.delete_label(labels[label_name]['id'])
 
-    api.add_column(config['trello']['product_board_id'], "Next Sprint", 6)
+    api.add_column(config['trello']['product_board_id'], "Next Sprint Final", 7)
 
     ##########################################
 
