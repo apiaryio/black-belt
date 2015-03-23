@@ -18,36 +18,28 @@ Product list to Work Cards
 
 .. TODO: bb t schedule-list [--label="Product: Example"] [--work-board="abcdef"] --story-card="defABC" --dev="user-id" [--list="xoxo"]
 
-To help with this task, one can use this command::
+To help with this task, one can use this command:
 
-	bb t schedule-list [--owner="TrelloUserName" [--story-list="Checklist Name"] [--label="color"] http://trello.com/c/story-card-shortlink
 
-Story list defaults to "To Do", Owner (that the new work tasks are assigned to) defaults to you.
+.. autofunction:: blackbelt.commands.t.schedule_list
+
 
 ------------
 Clean sweep
 ------------
 
-All cards with the given label is moved from :term:`Work Board` into given column in the :term:`Product Board`. ::
-
-	bb t migrate-label --label="Product: Example" --board="1KsoiV9e" --board-to="lEL8Ch52" --column-to="Prepared buffer"
+.. autofunction:: blackbelt.commands.t.migrate_label
 
 
 -------------------------
 Get ready for next week
 -------------------------
 
-Create new columns on the :term:`Work Board`: `Deployed by <sunday>` and `Verified by <sunday>`
-
-	bb t next-week
+.. autofunction:: blackbelt.commands.t.next_week
 
 
 -------------------------
 Verify a story
 -------------------------
 
-Looks through a checklists on :term:`Story`, see whether incomplete items refer to a card and whether the card is in `Deployed by <sunday>` and `Verified by <sunday>` column.
-
-If so, ask to open them and then to verify them (meaning ticking the checkbox).
-
-	bb t verify http://trello.com/c/story
+.. autofunction:: blackbelt.commands.t.verify

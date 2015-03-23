@@ -23,7 +23,7 @@ If you are using ``bash``, you want to enable autocompletion. You can try it wit
 
 	eval "$( _BB_COMPLETE=source bb)"
 
-and if it's working properly, put it into your :file:`~/.bashrc`.
+and if it's working properly, put it into your :file:`~/.bashrc`::
 
 	echo '_BB_COMPLETE=source bb > /tmp/_black_belt_autocompletion.sh'  >> ~/.bashrc
 	echo 'source /tmp/_black_belt_autocompletion.sh' >> ~/.bashrc
