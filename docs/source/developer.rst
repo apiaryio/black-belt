@@ -46,7 +46,9 @@ This:
 Issuing Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: blackbelt.commands.gh.pr
+.. autofunction:: blackbelt.commands.gh.pr_command
+
+.. autofunction:: blackbelt.handle_github.pull_request
    
 ------------------------------------
 Code review
@@ -60,7 +62,9 @@ Code review ensures the quality of the code and disperses the knowledge about th
 Merging Pull Request
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: blackbelt.commands.gh.merge
+.. autofunction:: blackbelt.commands.gh.merge_command
+
+.. autofunction:: blackbelt.handle_github.merge
 
 
 .. _deploy-pr:
@@ -68,7 +72,9 @@ Merging Pull Request
 Deploying Pull Requests
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: blackbelt.commands.gh.deploy
+.. autofunction:: blackbelt.commands.gh.deploy_command
+
+.. autofunction:: blackbelt.handle_github.deploy
 
 
 ------------------------------------

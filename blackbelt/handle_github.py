@@ -157,7 +157,7 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
 def merge(pr_url):
     """
-    This merges PR on Github into master with::
+    This merges PR on Github into master:
 
     #. Inspects the current repository and the pull request
     #. Switches to master and brings it up to date

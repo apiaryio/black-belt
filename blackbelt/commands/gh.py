@@ -14,18 +14,28 @@ def cli():
 
 @cli.command()
 @click.argument('card_url', required=False)
-def pr(card_url):
+def pr(*args, **kwargs):
+    pr_command(*args, **kwargs)
+
+
+def pr_command(card_url):
     """
     Usage::
 
         bb gh pr [CARD_URL]
+
+    See :mod:`threading` for more details.
     """
     pull_request(card_url)
 
 
 @cli.command()
 @click.argument('pr_url')
-def merge(pr_url):
+def merge(*args, **kwargs):
+    merge_command(*args, **kwargs)
+
+
+def merge_command(pr_url):
     """
     Usage::
 
@@ -36,7 +46,11 @@ def merge(pr_url):
 
 @cli.command()
 @click.argument('pr_url')
-def deploy(pr_url):
+def deploy(*args, **kwargs):
+    deploy_command(*args, **kwargs)
+
+
+def deploy_command(pr_url):
     """
     Usage::
 
