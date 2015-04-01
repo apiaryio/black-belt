@@ -305,10 +305,14 @@ def deploy(pr_url):
     try:
         ticket_id = get_pr_ticket_id(merge_info['description'])
         move_to_deployed(card_id=ticket_id, comment=comment)
-        create_release(ref=merge_info['sha'], payload='', description="Deployed to production")
     except ValueError:
         if click.prompt("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
+
+    try:
+        create_release(ref=merge_info['sha'], payload='', description="Deployed to production")
+    except ValueError:
+        print 'Error during github release creation.'
 
 def create_release(ref, payload, description):
     """ Create release in github after deploy to production """
