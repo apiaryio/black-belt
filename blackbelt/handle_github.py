@@ -244,7 +244,8 @@ def merge(pr_url):
         'number': pr_info['number'],
         'description': pr['body'],
         'html_url': pr['html_url'],
-        'title': pr['title']
+        'title': pr['title'],
+        'branch': pr['head']['ref']
     }
 
 
@@ -310,7 +311,7 @@ def deploy(pr_url):
             webbrowser.open(merge_info['html_url'])
 
     try:
-        create_release(ref=merge_info['sha'], payload='', description="Deployed to production")
+        create_release(ref=merge_info['branch'], payload='', description="Deployed to production")
     except ValueError:
         print 'Error during github release creation.'
 
