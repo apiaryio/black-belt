@@ -269,6 +269,7 @@ def deploy(pr_url):
     #. Asks for deploy confirmation
     #. Notify others on HipChat about deploy
     #. Deploys
+    #. Creates a release on GitHub, using merged branch name as 'ref'.
     #. If it can figure out related Trello card (looks for "Pull request for <link>"), moves it to "Deployed by" column
     #. Does *not* bring beer yet, unfortunately
 
