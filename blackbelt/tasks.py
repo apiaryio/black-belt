@@ -9,7 +9,7 @@ class BlackBelt(click.MultiCommand):
     def list_commands(self, ctx):
         rv = []
         for filename in os.listdir(plugin_folder):
-            if filename.endswith('.py') and filename is not '__init__.py':
+            if filename.endswith('.py') and filename != not '__init__.py':
                 rv.append(filename[:-3])
         rv.sort()
         return rv
