@@ -244,7 +244,8 @@ def merge(pr_url):
         'number': pr_info['number'],
         'description': pr['body'],
         'html_url': pr['html_url'],
-        'title': pr['title']
+        'title': pr['title'],
+        'branch': pr['head']['ref']
     }
 
 
@@ -305,10 +306,11 @@ def deploy(pr_url):
     try:
         ticket_id = get_pr_ticket_id(merge_info['description'])
         move_to_deployed(card_id=ticket_id, comment=comment)
-        create_release(ref=merge_info['sha'], payload='', description="Deployed to production")
     except ValueError:
         if click.prompt("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
+
+    create_release(ref=merge_info['branch'], payload='', description="Deployed to production")
 
 def create_release(ref, payload, description):
     """ Create release in github after deploy to production """
