@@ -275,6 +275,9 @@ def deploy(pr_url):
 
     """
     merge_info = merge(pr_url)
+    
+    repo = get_github_repo()
+    repo_info = get_remote_repo_info(repo)
 
     check_output(['grunt', 'create-slug'])
 
@@ -311,9 +314,9 @@ def deploy(pr_url):
         if click.prompt("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
 
-    create_release(ref=merge_info['branch'], payload='', description="Deployed to production")
+    create_release(ref=merge_info['branch'], payload='', description="Deployed to production", repo_info=repo_info)
 
-def create_release(ref, payload, description):
+def create_release(ref, payload, description, repo_info):
     """ Create release in github after deploy to production """
 
     url = "https://api.github.com/repos/%(owner)s/%(name)s/deployments" % repo_info
