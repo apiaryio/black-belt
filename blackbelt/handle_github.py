@@ -27,17 +27,6 @@ UA_STRING = "black-belt/%s" % VERSION
 PR_PHRASE_PREFIX = "Pull request for"
 
 
-def get_github_repo():
-    return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
-
-
-def get_remote_repo_info(github_repo_info):
-    match = re.match(r".*github.com(:|\/)(?P<owner>[a-zA-Z\_\-]+)/{1}(?P<name>[a-zA-Z\-\_]+)\.git$", github_repo_info)
-    if not match:
-        raise ValueError("Cannot parse repo info. Bad remote?")
-    return match.groupdict()
-
-
 def get_pr_info(pr_url):
     match = re.match(r".*github.com/(?P<owner>\S+)/{1}(?P<name>\S+)/pull/{1}(?P<number>\d+).*$", pr_url)
     if not match:

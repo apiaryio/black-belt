@@ -4,39 +4,10 @@ from mock import patch, MagicMock
 import requests
 
 from blackbelt.handle_github import (
-    get_remote_repo_info,
     get_pr_info,
     verify_merge,
     get_pr_ticket_id
 )
-
-
-class TestGithubRepoGitAddressParsing(object):
-
-    github_repo = 'git@github.com:apiaryio/apiary-test.git'
-
-    def setUp(self):
-        self.parsed = get_remote_repo_info(self.github_repo)
-
-    def test_repo_owner(self):
-        assert_equals('apiaryio', self.parsed['owner'])
-
-    def test_repo_name(self):
-        assert_equals('apiary-test', self.parsed['name'])
-
-
-class TestGithubRepoHttpsAddressParsing(object):
-
-    github_repo = 'https://github.com/apiaryio/apiary-test.git'
-
-    def setUp(self):
-        self.parsed = get_remote_repo_info(self.github_repo)
-
-    def test_repo_owner(self):
-        assert_equals('apiaryio', self.parsed['owner'])
-
-    def test_repo_name(self):
-        assert_equals('apiary-test', self.parsed['name'])
 
 
 class TestGithubPullRequestParsing(object):
