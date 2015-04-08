@@ -15,6 +15,14 @@ from .handle_trello import (
     comment_ticket,
     move_to_deployed
 )
+
+from .git import (
+    get_current_branch,
+    merge as git_merge,
+    get_github_repo,
+    get_remote_repo_info
+)
+
 from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
@@ -111,14 +119,6 @@ def pull_request(card_url):
     webbrowser.open(pr_info['html_url'])
 
 
-def get_current_branch():
-    return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
-
-
-def get_current_sha():
-    return check_output(['git', 'rev-parse', 'HEAD']).strip()
-
-
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
@@ -191,16 +191,10 @@ def merge(pr_url):
 
     sha = pr['head']['sha']
 
-    if get_current_branch() != 'master':
-        check_output(['git', 'checkout', 'master'])
-
-    check_output(['git', 'pull'])
-
-    check_output(['git', 'merge', sha, '-m', "Merging pull request #%(number)s: %(title)s " % pr])
-
-    check_output(['git', 'push', 'origin', 'master'])
-
-    merge_sha = get_current_sha()
+    merge_sha = git_merge(
+        sha=sha,
+        message="Merging pull request #%(number)s: %(title)s " % pr
+    )
 
     verify_merge(pr_info, headers)
 
