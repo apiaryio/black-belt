@@ -5,7 +5,7 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 
 ## Installation & Usage
 
-Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org/). 
+Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org/).
 
 
 ## If you want to develop black-belt...
@@ -26,11 +26,11 @@ paver test
 `paver test`
 
 If you ran `bb init` and you want to do "discovery testing" with the integration tests,
-set `FORCE_DISCOVERY`environmental variable to `1`.
+set `FORCE_DISCOVERY`environment variable to `1`.
 
 ### Release
 
-When the time is right, run `paver bump`. 
+When the time is right, run `paver bump`.
 
 When adding new feature (command etc), run `paver bump major` instead.
 
