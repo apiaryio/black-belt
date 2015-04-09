@@ -15,6 +15,14 @@ from .handle_trello import (
     comment_ticket,
     move_to_deployed
 )
+
+from .git import (
+    get_current_branch,
+    merge as git_merge,
+    get_github_repo,
+    get_remote_repo_info
+)
+
 from .hipchat import post_message
 from .circle import wait_for_tests
 from .version import VERSION
@@ -25,17 +33,6 @@ GITHUB_CLIENT_ID = "c9f51ce9cb320bf86f16"
 UA_STRING = "black-belt/%s" % VERSION
 
 PR_PHRASE_PREFIX = "Pull request for"
-
-
-def get_github_repo():
-    return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
-
-
-def get_remote_repo_info(github_repo_info):
-    match = re.match(r".*github.com(:|\/)(?P<owner>[a-zA-Z\_\-]+)/{1}(?P<name>[a-zA-Z\-\_]+)\.git$", github_repo_info)
-    if not match:
-        raise ValueError("Cannot parse repo info. Bad remote?")
-    return match.groupdict()
 
 
 def get_pr_info(pr_url):
@@ -122,14 +119,6 @@ def pull_request(card_url):
     webbrowser.open(pr_info['html_url'])
 
 
-def get_current_branch():
-    return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
-
-
-def get_current_sha():
-    return check_output(['git', 'rev-parse', 'HEAD']).strip()
-
-
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
@@ -202,16 +191,10 @@ def merge(pr_url):
 
     sha = pr['head']['sha']
 
-    if get_current_branch() != 'master':
-        check_output(['git', 'checkout', 'master'])
-
-    check_output(['git', 'pull'])
-
-    check_output(['git', 'merge', sha, '-m', "Merging pull request #%(number)s: %(title)s " % pr])
-
-    check_output(['git', 'push', 'origin', 'master'])
-
-    merge_sha = get_current_sha()
+    merge_sha = git_merge(
+        sha=sha,
+        message="Merging pull request #%(number)s: %(title)s " % pr
+    )
 
     verify_merge(pr_info, headers)
 
