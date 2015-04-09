@@ -20,7 +20,7 @@ def get_token(config, token_url, group_name, address_text="Please generate a tok
 
     webbrowser.open(token_url)
 
-    token = click.prompt("Please insert an access token", default_token)
+    token = click.prompt("Please insert an access token", default_token).strip()
 
     if group_name not in config:
         config[group_name] = {}
