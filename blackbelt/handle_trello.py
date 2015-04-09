@@ -319,9 +319,19 @@ def move_to_deployed(card_id, comment=None):
                 api.comment_card(card_id=card_id, comment=comment)
 
 
+def get_next_sunday():
+    diff = datetime.date.today().weekday()
+    # On sunday, add week instead
+    if diff == 6:
+        diff = -1
+
+    return datetime.date.today() + datetime.timedelta(
+        days=6 - diff
+    )
+
+
 def next_week():
-    sunday = datetime.date.today() + datetime.timedelta(days=datetime.date.today().weekday() + 6)
-    sunday = sunday.isoformat()
+    sunday = get_next_sunday().isoformat()
 
     api = get_api()
     api.add_column(
