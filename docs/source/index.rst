@@ -31,6 +31,11 @@ and if it's working properly, put it into your :file:`~/.bashrc`::
 
 See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more information.
 
+If you are using ``zsh``, you want to enable autocompletion.
+
+You can try it plugin for [Oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh) and enable it in :file:`~/.zshrc`::
+
+  plugins=(bb)
 
 --------------
 Structure
