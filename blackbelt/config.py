@@ -23,6 +23,9 @@ except IOError:
         },
         'hipchat': {
             'access_token': None
+        },
+        'slack': {
+            'access_token': None
         }
     }
 

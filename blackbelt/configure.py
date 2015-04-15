@@ -70,6 +70,9 @@ def configure_blackbelt():
         },
         'hipchat': {
             'access_token': None
+        },
+        'slack': {
+            'access_token': None
         }
     }
 
@@ -115,6 +118,12 @@ def configure_blackbelt():
         group_name='hipchat',
         config=config,
         token_url="https://apiary.hipchat.com/account/api"
+    )
+
+    get_token(
+        group_name='slack',
+        config=config,
+        token_url="https://api.slack.com/web"
     )
 
     with open(expanduser('~/.blackbelt'), 'w') as f:
