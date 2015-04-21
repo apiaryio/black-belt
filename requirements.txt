@@ -2,3 +2,9 @@ click
 requests
 PyGithub
 slacker
+
+# see https://urllib3.readthedocs.org/en/latest/security.html#openssl-pyopenssl
+# for reasons why to install following packages
+pyopenssl
+ndg-httpsclient
+pyasn1
