@@ -1,7 +1,7 @@
 from subprocess import check_call
 
 from blackbelt.handle_github import get_current_branch
-from blackbelt.hipchat import post_message
+from blackbelt.messages import post_message
 
 
 def deploy_staging():
