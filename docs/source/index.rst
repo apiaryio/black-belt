@@ -16,6 +16,8 @@ With that, you should have ``bb`` command. Run interactive ``bb init`` and follo
 
 * GitHub
 * Trello
+* Slack
+* Hipchat
 
 Retrieved tokens and configuration is stored in ``~/.blackbelt``. Format is now just dumped JSON, don't rely on it; it's probably going to change in the future.
 

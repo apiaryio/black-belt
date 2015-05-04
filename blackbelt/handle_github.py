@@ -23,7 +23,7 @@ from .git import (
     get_remote_repo_info
 )
 
-from .hipchat import post_message
+from .messages import post_message
 from .circle import wait_for_tests
 from .version import VERSION
 from .notify import notify
