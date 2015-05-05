@@ -6,7 +6,7 @@ options = environment.options
 NAME = 'blackbelt'
 VERSION = '0.11.8'
 
-requires = ['click', 'requests', 'PyGithub']
+requires = ['click', 'requests', 'PyGithub', 'slacker', 'pyopenssl', 'ndg-httpsclient', 'pyasn1']
 
 setup(
     name=NAME,
