@@ -4,7 +4,7 @@ from paver.setuputils import setup
 options = environment.options
 
 NAME = 'blackbelt'
-VERSION = '0.11.8'
+VERSION = '0.11.9'
 
 requires = ['click', 'requests', 'PyGithub', 'slacker', 'pyopenssl', 'ndg-httpsclient', 'pyasn1']
 
