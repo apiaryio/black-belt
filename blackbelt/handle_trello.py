@@ -1,5 +1,7 @@
 import datetime
+from email.mime.text import MIMEText
 import re
+import smtplib
 from subprocess import check_output
 import webbrowser
 
@@ -23,6 +25,8 @@ TODO_QUEUE_NAME = "To Do Queue"
 DEPLOY_QUEUE_NAME = "Ready"
 DEPLOYED_PREFIX = "Deployed by"
 VERIFIED_PREFIX = "Verified by"
+
+TEA_ORDER_QUEUE_NAME = "Order next"
 
 
 def get_token_url():
@@ -403,3 +407,64 @@ def verify(story_card):
                 item_id=item['id'],
                 card_id=story_card['id']
             )
+
+
+def get_tea_from_card(card):
+    return {
+        'name': card['name'],
+        'url': [word for word in card['desc'].split() if word.startswith('http')][0]
+    }
+
+def get_tea_email(teas, sender_name):
+
+    tea_text = ''
+    for tea in teas:
+        tea_text += """
+%(name)s
+%(url)s
+""" % tea
+
+    return u"""Hi %(office_manager_name)s,
+
+we are running out of tea, please rescue us!
+
+Here are the teas we'd love to try:
+
+%(teas)s
+
+Thanks a lot!
+
+%(name)s
+
+    """ % {
+        'name': sender_name,
+        'teas': tea_text,
+        'office_manager_name': config['office']['office_manager_name']
+    }
+
+def order_tea():
+    api = get_api()
+
+    column = get_column(name=TEA_ORDER_QUEUE_NAME, board_id=config['trello']['tea_board_id'])
+    cards = api.get_cards(column_id=column['id'])
+
+    me = api.get_myself()
+
+    teas = [get_tea_from_card(card) for card in cards]
+
+    text = get_tea_email(teas, me['fullName'])
+
+    print text.encode('utf-8')
+
+    if click.confirm("Do you want to send the email above?"):
+        email = me['email'] or 'no-reply@apiary.io'
+
+        message = MIMEText(text.encode('utf-8'))
+        message['Subject'] = 'Tea order'
+        message['From'] = email
+        message['To'] = config['office']['office_manager_email']
+
+        #FIXME: Use sendgrid
+        s = smtplib.SMTP('localhost')
+        s.sendmail(email, [config['office']['office_manager_email']], message.as_string('utf-8'))
+        s.quit()
