@@ -6,7 +6,8 @@ from blackbelt.handle_trello import (
     next_card as n,
     next_week as nw,
     open_current_working_ticket as cc,
-    verify as v
+    verify as v,
+    order_tea as ot
 )
 
 
@@ -83,3 +84,9 @@ def verify(**kwargs):
     """
     #TODO: Scan through all cards in the "Being worked on" column on story board
     v(**kwargs)
+
+
+@cli.command(name='gimmetea')
+def order_tea():
+    """ Gather information about Tea and sent it to Office Manager for order """
+    ot()
