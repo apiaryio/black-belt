@@ -68,9 +68,6 @@ def configure_blackbelt():
         'circleci': {
             'access_token': None
         },
-        'hipchat': {
-            'access_token': None
-        },
         'slack': {
             'access_token': None
         }
@@ -112,12 +109,6 @@ def configure_blackbelt():
         group_name='circleci',
         config=config,
         token_url="https://circleci.com/account/api"
-    )
-
-    get_token(
-        group_name='hipchat',
-        config=config,
-        token_url="https://apiary.hipchat.com/account/api"
     )
 
     get_token(

@@ -245,12 +245,12 @@ def deploy(pr_url):
     Deploys PR to production
 
     #. Does :ref:`pr-merge`
-    #. Inform people on HipChat about the merge and the deployment intent
+    #. Inform people on Slack about the merge and the deployment intent
     #. Prepares Heroku deploy slugs using ``grunt create-slug``
     #. Waits for CircleCI tests to pass
     #. TODO: If they fail, asks for retry
     #. Asks for deploy confirmation
-    #. Notify others on HipChat about deploy
+    #. Notify others on Slack about deploy
     #. Deploys
     #. Creates a release on GitHub, using merged branch name as 'ref'.
     #. If it can figure out related Trello card (looks for "Pull request for <link>"), moves it to "Deployed by" column
