@@ -21,9 +21,6 @@ except IOError:
         'circleci': {
             'access_token': None
         },
-        'hipchat': {
-            'access_token': None
-        },
         'slack': {
             'access_token': None
         }
