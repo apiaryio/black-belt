@@ -10,3 +10,8 @@ def deploy_staging():
     post_message("@here Deploying branch %s to staging" % branch_name, "#deploy-queue")
 
     check_call(['grunt', 'deploy', '--app=apiary-staging', '--force', "--branch=%s" % branch_name])
+
+def deploy_production():
+    post_message("@here Deploying to production" % branch_name, "#deploy-queue")
+
+    check_call(['grunt', 'deploy'])
