@@ -3,6 +3,7 @@ import os
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 class BlackBelt(click.MultiCommand):
 
@@ -22,7 +23,7 @@ class BlackBelt(click.MultiCommand):
             eval(code, ns, ns)
         return ns['cli']
 
-cli = BlackBelt(help='Black Belt: automate project The Apiary Way. Please provide a command.')
+cli = BlackBelt(context_settings=CONTEXT_SETTINGS, help='Black Belt: automate project The Apiary Way. Please provide a command.')
 
 
 # backward compatibility
