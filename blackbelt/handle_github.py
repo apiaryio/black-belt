@@ -218,7 +218,7 @@ def merge(pr_url):
         'title': pr['title'],
         'comments': pr['comments'],
         'commits': pr['commits']
-    })
+    }, "#deploy-queue")
 
     return {
         'sha': merge_sha,
@@ -282,7 +282,7 @@ def deploy(pr_url):
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
-    post_message("@here Deploying \"%(title)s\" in 15 seconds" % merge_info)
+    post_message("@here Deploying \"%(title)s\" in 15 seconds" % merge_info, "#deploy-queue")
 
     sleep(15)
 

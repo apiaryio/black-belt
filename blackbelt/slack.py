@@ -12,10 +12,10 @@ class Slack(object):
 
         self.token = token
 
-    def post_message(self, message, room='#engine-room'):
+    def post_message(self, message, room):
         return self.slack.chat.post_message(room, message)
 
 
-def post_message(message):
+def post_message(message, room='#engine-room'):
     client = Slack()
-    client.post_message(message)
+    client.post_message(message, room)
