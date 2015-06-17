@@ -18,10 +18,11 @@ class BlackBelt(click.MultiCommand):
     def get_command(self, ctx, name):
         ns = {}
         fn = os.path.join(plugin_folder, name + '.py')
-        with open(fn) as f:
-            code = compile(f.read(), fn, 'exec')
-            eval(code, ns, ns)
-        return ns['cli']
+        if os.path.exists(fn):
+            with open(fn) as f:
+                code = compile(f.read(), fn, 'exec')
+                eval(code, ns, ns)
+            return ns['cli']
 
 cli = BlackBelt(context_settings=CONTEXT_SETTINGS, help='Black Belt: automate project The Apiary Way. Please provide a command.')
 
