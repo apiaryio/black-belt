@@ -77,6 +77,21 @@ Deploying Pull Requests
 .. autofunction:: blackbelt.handle_github.deploy
 
 
+Deploying master
+^^^^^^^^^^^^^^^^
+
+.. _deploy-production:
+
+Deploy current branch to production with::
+
+  bb production
+
+This:
+
+#. Informs others on Slack
+#. Deploys master to production using ``grunt deploy``
+
+
 ------------------------------------
 Testing
 ------------------------------------
@@ -90,5 +105,6 @@ Deploy current branch to staging with::
 This:
 
 #. Discovers what the current branch is
-#. Informs others on HipChat
+#. Informs others on Slack
 #. Deploys the branch to staging using ``grunt deploy``
+
