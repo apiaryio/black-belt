@@ -13,7 +13,7 @@ class Slack(object):
         self.token = token
 
     def post_message(self, message, room):
-        return self.slack.chat.post_message(room, message)
+        return self.slack.chat.post_message(room, message, username = "Black Belt", icon_emoji = ":black_joker:")
 
 
 def post_message(message, room='#engine-room'):
