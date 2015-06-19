@@ -16,7 +16,7 @@ class Slack(object):
         return self.slack.auth.test().body['user_id']
 
     def post_message(self, message, room):
-        return self.slack.chat.post_message(room, message, username = "Black Belt", icon_emoji = ":black_joker:")
+        return self.slack.chat.post_message(room, message, username = "Black Belt", icon_emoji = ":blackbelt:")
 
 
 def post_message(message, room='#sre'):
