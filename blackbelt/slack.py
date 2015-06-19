@@ -19,7 +19,7 @@ class Slack(object):
         return self.slack.chat.post_message(room, message, username = "Black Belt", icon_emoji = ":blackbelt:")
 
 
-def post_message(message, room='#sre'):
+def post_message(message, room='#engine-room'):
     client = Slack()
     msg = "<@%s> %s" % (client.get_user_id(), message)
     client.post_message(msg, room)
