@@ -12,10 +12,14 @@ class Slack(object):
 
         self.token = token
 
+    def get_user_id(self):
+        return self.slack.auth.test().body['user_id']
+
     def post_message(self, message, room):
-        return self.slack.chat.post_message(room, message)
+        return self.slack.chat.post_message(room, message, username = "Black Belt", icon_emoji = ":blackbelt:")
 
 
 def post_message(message, room='#engine-room'):
     client = Slack()
-    client.post_message(message, room)
+    msg = "<@%s> %s" % (client.get_user_id(), message)
+    client.post_message(msg, room)
