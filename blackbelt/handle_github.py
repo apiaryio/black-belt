@@ -211,7 +211,7 @@ def merge(pr_url):
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
     print "#%(number)s merged!" % pr_info
-    post_message("@here [%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
+    post_message("[%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
         'owner': pr_info['owner'],
         'name': pr_info['name'],
         'number': pr_info['number'],
@@ -282,7 +282,7 @@ def deploy(pr_url):
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
-    post_message("@here Deploying \"%(title)s\" in 15 seconds" % merge_info, "#deploy-queue")
+    post_message("Deploying \"%(title)s\" in 15 seconds" % merge_info, "#deploy-queue")
 
     sleep(15)
 
