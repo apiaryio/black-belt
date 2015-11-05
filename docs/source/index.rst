@@ -10,7 +10,12 @@ This is an internal tool for supporting development workflow inside `Apiary <htt
 Installation
 --------------
 
-``pip install blackbelt`` if you can, ``easy_install blackbelt`` if you must (Mac OS X default).
+``pip install blackbelt`` if you can, ``easy_install blackbelt`` if
+you must (Mac OS X default).
+
+.. note::
+   Python 2.7 is assumed. Python 3.x is not supported at all.
+
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
@@ -22,12 +27,12 @@ Retrieved tokens and configuration is stored in ``~/.blackbelt``. Format is now 
 
 If you are using ``bash``, you want to enable autocompletion. You can try it with::
 
-	eval "$( _BB_COMPLETE=source bb)"
+        eval "$( _BB_COMPLETE=source bb)"
 
 and if it's working properly, put it into your :file:`~/.bashrc`::
 
-	echo '_BB_COMPLETE=source bb > /tmp/_black_belt_autocompletion.sh'  >> ~/.bashrc
-	echo 'source /tmp/_black_belt_autocompletion.sh' >> ~/.bashrc
+        echo '_BB_COMPLETE=source bb > /tmp/_black_belt_autocompletion.sh'  >> ~/.bashrc
+        echo 'source /tmp/_black_belt_autocompletion.sh' >> ~/.bashrc
 
 
 See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more information.
