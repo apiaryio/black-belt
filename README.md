@@ -10,7 +10,7 @@ Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org
 
 ## If you want to develop black-belt...
 
-`virtualenv` assumed (`sudo pip install virtualenv`)
+`virtualenv` assumed (`sudo pip install virtualenv`) and Python 2.7
 
 ```
 virtualenv venv
