@@ -34,25 +34,32 @@ UA_STRING = "black-belt/%s" % VERSION
 
 PR_PHRASE_PREFIX = "Pull request for"
 
-
 def get_pr_info(pr_url):
     match = re.match(r".*github.com/(?P<owner>\S+)/{1}(?P<name>\S+)/pull/{1}(?P<number>\d+).*$", pr_url)
     if not match:
         raise ValueError("Cannot parse pull request URL, bad format")
     return match.groupdict()
 
-
 def get_username():
     url = "https://api.github.com/user"
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
+    res = get_json_response(url)
+
+    return res['login']
+
+def get_request_headers():
+    return {
+        'Authorization': "token %s" % config['github']['access_token'],
+        'User-Agent': UA_STRING
     }
 
-    res = requests.get(url, headers=headers)
+def get_json_response(url):
+    r = requests.get(url, headers=get_request_headers())
 
-    return res.json()['login']
+    if r.status_code != 200:
+        raise ValueError("Request to URL %s failed with code %s: %s" % (url, r.status_code, r))
 
+    return r.json()
 
 def pull_request(card_url):
     """
@@ -93,11 +100,7 @@ def pull_request(card_url):
         'body': pr_description
     }
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
-    }
-
-    r = requests.post(url, data=json.dumps(payload), headers=headers)
+    r = requests.post(url, data=json.dumps(payload), headers=get_request_headers())
 
     if r.status_code != 201:
         print r.json()
@@ -118,7 +121,6 @@ def pull_request(card_url):
 
     webbrowser.open(pr_info['html_url'])
 
-
 def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
     start_time = datetime.now()
@@ -127,7 +129,7 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
     def do_request():
         r = requests.get(merge_url, headers=headers)
 
-        if (r.status_code == 404):
+        if r.status_code == 404:
             if datetime.now() < start_time + timedelta(seconds=max_waiting_time):
                 sleep(retry_time)
                 return False
@@ -142,7 +144,6 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
     while not succeeded:
         succeeded = do_request()
-
 
 def merge(pr_url):
     """
@@ -159,24 +160,11 @@ def merge(pr_url):
 
     """
 
+    # Check if PR is ready to merge (it's open and required status checks passed)
+    check_status(pr_url=pr_url, error_on_failure=True)
+
     pr_info = get_pr_info(pr_url)
-
-    pr_api_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
-
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token'],
-        'User-Agent': UA_STRING
-    }
-
-    r = requests.get(pr_api_url, headers=headers)
-
-    if (r.status_code != 200):
-        raise ValueError("Cannot retrieve PR info with status code %s: %s" % (r.status_code, r))
-
-    pr = r.json()
-
-    if pr['state'] != 'open':
-        raise ValueError("PR is %(state)s instead of still being open; not merging" % pr)
+    pr = get_json_response("https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info)
 
     gh_repo = pr['base']['repo']
 
@@ -189,6 +177,9 @@ def merge(pr_url):
             gh_repo['git_url'], get_github_repo()
         ))
 
+    # Check if master is ready; if not (e.g. failed, pending), confirm with the user
+    check_status(branch_name="master", error_on_failure=False, confirm_to_proceed_on_error=True)
+
     sha = pr['head']['sha']
 
     merge_sha = git_merge(
@@ -196,6 +187,7 @@ def merge(pr_url):
         message="Merging pull request #%(number)s: %(title)s " % pr
     )
 
+    headers = get_request_headers()
     verify_merge(pr_info, headers)
 
     # All good, delete branch
@@ -207,7 +199,7 @@ def merge(pr_url):
     }
     r = requests.delete(branch_url, headers=headers)
 
-    if (r.status_code != 204):
+    if r.status_code != 204:
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
     print "#%(number)s merged!" % pr_info
@@ -231,6 +223,63 @@ def merge(pr_url):
         'branch': pr['head']['ref']
     }
 
+def check_status(pr_url=None, branch_name=None, error_on_failure=False, confirm_to_proceed_on_error=False):
+    if not (pr_url or branch_name):
+        return
+
+    errors = []
+    if pr_url:
+        pr_info = get_pr_info(pr_url)
+        pr = get_json_response("https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info)
+        message = "PR state: %(state)s" % pr
+        if pr['state'] != 'open':
+            errors.append(message)
+        else:
+            print message
+
+        # Check if PR is ready (all required checks passed)
+        status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(head_sha)s/status" % {
+                                'owner': pr_info['owner'],
+                                'name': pr_info['name'],
+                                'head_sha': pr['head']['sha']}
+
+        pr_status = get_json_response(status_url)
+        message = "PR required checks (%(count)g): %(state)s" % { 
+                                'count': len(pr_status['statuses']),
+                                'state': pr_status['state'] }
+        if pr_status['state'] != 'success':
+            errors.append(message)
+        else:
+            print message
+
+    if branch_name:
+        repo = get_github_repo()
+        repo_info = get_remote_repo_info(repo)
+
+        status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(branch_name)s/status" % {
+                                'owner': repo_info['owner'],
+                                'name': repo_info['name'],
+                                'branch_name': branch_name}
+        branch = get_json_response(status_url)
+        message = "Branch required checks (%(count)g): %(state)s" % { 
+                                'count': len(branch['statuses']),
+                                'state': branch['state'] }
+        if branch['state'] != 'success':
+            errors.append(message)
+        else:
+            print message
+
+    if not errors:
+        print "All is good!"
+        return
+
+    if error_on_failure:
+        raise ValueError("Status check failed:\n" + '\n'.join(errors))
+    else:
+        print '\n'.join(errors)
+
+    if confirm_to_proceed_on_error:
+        click.confirm("Do you want to continue?", abort=True)
 
 def get_pr_ticket_id(description):
     match = re.search(PR_PHRASE_PREFIX + ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
@@ -238,7 +287,6 @@ def get_pr_ticket_id(description):
         raise ValueError("Can't find URL in the PR description")
 
     return match.groupdict()['id']
-
 
 def deploy(pr_url):
     """
@@ -258,7 +306,7 @@ def deploy(pr_url):
 
     """
     merge_info = merge(pr_url)
-    
+
     repo = get_github_repo()
     repo_info = get_remote_repo_info(repo)
 
@@ -310,14 +358,8 @@ def create_release(ref, payload, description, repo_info):
         'description': description
     }
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
-    }
-
-    r = requests.post(url, data=json.dumps(body), headers=headers)
+    r = requests.post(url, data=json.dumps(body), headers=get_request_headers())
 
     if r.status_code != 201:
         print r.json()
         raise ValueError("Create github release ended with status code %s: %s" % (r.status_code, r))
-
-
