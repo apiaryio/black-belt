@@ -30,7 +30,7 @@ TEA_ORDER_QUEUE_NAME = "Order next"
 
 
 def get_token_url():
-    return TrelloApi().get_token_url("black-belt")
+    return TrelloApi().get_token_url("black-belt", "never")
 
 
 def get_api():
