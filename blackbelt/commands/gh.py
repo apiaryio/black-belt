@@ -75,4 +75,4 @@ def status_command(pr_url, branch):
 
         Applicable for PRs and branches
     """
-    check_status(pr_url=pr_url, branch_name=branch, error_on_failure=False, confirm_to_proceed_on_error=False)
+    check_status(pr_url=pr_url, branch_name=branch, error_on_failure=False)

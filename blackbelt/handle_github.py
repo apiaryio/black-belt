@@ -40,6 +40,19 @@ def get_pr_info(pr_url):
         raise ValueError("Cannot parse pull request URL, bad format")
     return match.groupdict()
 
+def get_pr_api_url(pr_url):
+    pr_info = get_pr_info(pr_url)
+    return "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
+
+def get_pr_details(pr_url):
+    return get_json_response(get_pr_api_url(pr_url))
+
+def get_branch_url(pr_details):
+    return "https://api.github.com/repos/%(repo_full_name)s/git/refs/heads/%(branch)s" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'branch': pr_details['head']['ref']
+    }
+
 def get_username():
     url = "https://api.github.com/user"
 
@@ -121,8 +134,8 @@ def pull_request(card_url):
 
     webbrowser.open(pr_info['html_url'])
 
-def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
-    merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
+def verify_merge(pr_url, headers, max_waiting_time=30, retry_time=0.1):
+    merge_url = get_pr_api_url(pr_url) + "/merge"  # https://api.github.com/repos/apiaryio/apiary/pulls/1234/merge
     start_time = datetime.now()
     succeeded = False
 
@@ -160,126 +173,141 @@ def merge(pr_url):
 
     """
 
-    # Check if PR is ready to merge (it's open and required status checks passed)
-    check_status(pr_url=pr_url, error_on_failure=True)
+    pr_details = get_pr_details(pr_url)
 
-    pr_info = get_pr_info(pr_url)
-    pr = get_json_response("https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info)
+    # Check if PR is ready to merge - OPEN status
+    verify_pr_state(pr_details)
 
-    gh_repo = pr['base']['repo']
+    # Check if required status checks passed for the PR
+    verify_pr_required_checks(pr_details)
 
-    if get_github_repo() not in [
-        gh_repo['git_url'],
-        gh_repo['ssh_url'],
-        gh_repo['clone_url']
-    ]:
-        raise ValueError("The pull request is for the repository %s, while your origin is set up for %s" % (
-            gh_repo['git_url'], get_github_repo()
-        ))
+    # Check if PR GitHub repository matches the current repository
+    verify_gh_repo(pr_details['base']['repo'])
 
     # Check if master is ready; if not (e.g. failed, pending), confirm with the user
-    check_status(branch_name="master", error_on_failure=False, confirm_to_proceed_on_error=True)
+    try:
+        verify_branch_required_checks(branch_name="master")
+    except ValueError:
+        click.confirm("The master branch hasn't passed the required checks. Do you still want to continue?", abort=True)
 
-    sha = pr['head']['sha']
+    sha = pr_details['head']['sha']
 
     merge_sha = git_merge(
         sha=sha,
-        message="Merging pull request #%(number)s: %(title)s " % pr
+        message="Merging pull request #%(number)s: %(title)s " % pr_details
     )
 
     headers = get_request_headers()
-    verify_merge(pr_info, headers)
+    verify_merge(pr_url, headers)
 
     # All good, delete branch
-    branch_url = "https://api.github.com/repos/%(owner)s/%(name)s/git/refs/heads/%(branch)s" % {
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'branch': pr['head']['ref']
+    branch_url = get_branch_url(pr_details)
 
-    }
     r = requests.delete(branch_url, headers=headers)
 
     if r.status_code != 204:
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
-    print "#%(number)s merged!" % pr_info
-    post_message("[%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'number': pr_info['number'],
-        'title': pr['title'],
-        'comments': pr['comments'],
-        'commits': pr['commits']
+    print "#%(number)s merged!" % pr_details
+
+    post_message("[%(repo_full_name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'number': pr_details['number'],
+        'title': pr_details['title'],
+        'comments': pr_details['comments'],
+        'commits': pr_details['commits']
     }, "#deploy-queue")
 
     return {
         'sha': merge_sha,
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'number': pr_info['number'],
-        'description': pr['body'],
-        'html_url': pr['html_url'],
-        'title': pr['title'],
-        'branch': pr['head']['ref']
+        'owner': pr_details['base']['repo']['owner']['login'],
+        'name': pr_details['base']['repo']['name'],
+        'number': pr_details['number'],
+        'description': pr_details['body'],
+        'html_url': pr_details['html_url'],
+        'title': pr_details['title'],
+        'branch': pr_details['head']['ref']
     }
 
-def check_status(pr_url=None, branch_name=None, error_on_failure=False, confirm_to_proceed_on_error=False):
+def check_status(pr_url=None, branch_name=None, error_on_failure=False):
     if not (pr_url or branch_name):
         return
 
-    errors = []
     if pr_url:
-        pr_info = get_pr_info(pr_url)
-        pr = get_json_response("https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info)
-        message = "PR state: %(state)s" % pr
-        if pr['state'] != 'open':
-            errors.append(message)
-        else:
-            print message
-
-        # Check if PR is ready (all required checks passed)
-        status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(head_sha)s/status" % {
-                                'owner': pr_info['owner'],
-                                'name': pr_info['name'],
-                                'head_sha': pr['head']['sha']}
-
-        pr_status = get_json_response(status_url)
-        message = "PR required checks (%(count)g): %(state)s" % { 
-                                'count': len(pr_status['statuses']),
-                                'state': pr_status['state'] }
-        if pr_status['state'] != 'success':
-            errors.append(message)
-        else:
-            print message
+        pr_details = get_pr_details(pr_url)
+        try:
+            # Check if PR state is open
+            verify_pr_state(pr_details)
+            # Check if PR is ready (all required checks passed)
+            verify_pr_required_checks(pr_details)
+        except ValueError as exc:
+            if error_on_failure:
+                raise
+            else:
+                print exc.message
 
     if branch_name:
-        repo = get_github_repo()
-        repo_info = get_remote_repo_info(repo)
+        try:
+            verify_branch_required_checks(branch_name)
+        except ValueError as exc:
+            if error_on_failure:
+                raise
+            else:
+                print exc.message
 
-        status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(branch_name)s/status" % {
-                                'owner': repo_info['owner'],
-                                'name': repo_info['name'],
-                                'branch_name': branch_name}
-        branch = get_json_response(status_url)
-        message = "Branch required checks (%(count)g): %(state)s" % { 
-                                'count': len(branch['statuses']),
-                                'state': branch['state'] }
-        if branch['state'] != 'success':
-            errors.append(message)
-        else:
-            print message
+def verify_pr_state(pr_details):
+    pr_state = pr_details['state']
+    message = "PR state: %s" % pr_state
+    if pr_state != 'open':
+        raise ValueError(message)
 
-    if not errors:
-        print "All is good!"
-        return
+    print message
+    return message
 
-    if error_on_failure:
-        raise ValueError("Status check failed:\n" + '\n'.join(errors))
-    else:
-        print '\n'.join(errors)
+def verify_pr_required_checks(pr_details):
+    status_url = "https://api.github.com/repos/%(repo_full_name)s/commits/%(head_sha)s/status" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'head_sha': pr_details['head']['sha']}
 
-    if confirm_to_proceed_on_error:
-        click.confirm("Do you want to continue?", abort=True)
+    pr_checks_info = get_json_response(status_url)
+    message = "PR required checks (%(count)g): %(state)s" % {
+        'count': len(pr_checks_info['statuses']),
+        'state': pr_checks_info['state']}
+    if pr_checks_info['state'] != 'success':
+        raise ValueError(message)
+
+    print message
+    return message
+
+def verify_branch_required_checks(branch_name):
+    repo = get_github_repo()
+    repo_info = get_remote_repo_info(repo)
+
+    status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(branch_name)s/status" % {
+        'owner': repo_info['owner'],
+        'name': repo_info['name'],
+        'branch_name': branch_name}
+    branch = get_json_response(status_url)
+    message = "Branch required checks (%(count)g): %(state)s" % {
+        'count': len(branch['statuses']),
+        'state': branch['state']}
+    if branch['state'] != 'success':
+        raise ValueError(message)
+
+    print message
+    return message
+
+def verify_gh_repo(pr_gh_repo):
+    origin_gh_repo = get_github_repo()
+
+    if origin_gh_repo not in [
+        pr_gh_repo['git_url'],
+        pr_gh_repo['ssh_url'],
+        pr_gh_repo['clone_url']
+    ]:
+            raise ValueError("The pull request is for the repository %s, while your origin is set up for %s" % (
+                pr_gh_repo['git_url'], origin_gh_repo))
+
 
 def get_pr_ticket_id(description):
     match = re.search(PR_PHRASE_PREFIX + ' ' + r"\[.*\]\(https://trello.com/c/(?P<id>\w+)/.*\)", description)
