@@ -1,8 +1,8 @@
 .. highlight:: bash
 
-============
+=========
 Developer
-============
+=========
 
 The :term:`Developer` processes :term:`Work Card`s, develops them and deploys them to production.
 
@@ -12,9 +12,9 @@ Those are the task :term:`Developer` may want to perform.
 
 .. _development:
 
-------------------------------------
+--------------------
 Development as usual
-------------------------------------
+--------------------
 
 Open current task
 ^^^^^^^^^^^^^^^^^
@@ -26,7 +26,7 @@ Open current Trello card in browser::
 .. _next-card:
 
 Move on to the next task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Move on to the next (Trello) card with::
 
@@ -44,15 +44,15 @@ This:
 .. _issue-pr:
 
 Issuing Pull Request
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: blackbelt.commands.gh.pr_command
 
 .. autofunction:: blackbelt.handle_github.pull_request
    
-------------------------------------
+-----------
 Code review
-------------------------------------
+-----------
 
 Code review ensures the quality of the code and disperses the knowledge about the code and features through the team.
 
@@ -60,7 +60,7 @@ Code review ensures the quality of the code and disperses the knowledge about th
 .. _pr-merge:
 
 Merging Pull Request
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: blackbelt.commands.gh.merge_command
 
@@ -70,7 +70,7 @@ Merging Pull Request
 .. _deploy-pr:
 
 Deploying Pull Requests
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: blackbelt.commands.gh.deploy_command
 
@@ -92,9 +92,9 @@ This:
 #. Deploys master to production using ``grunt deploy``
 
 
-------------------------------------
+-------
 Testing
-------------------------------------
+-------
 
 .. _deploy-staging:
 

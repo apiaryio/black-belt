@@ -1,14 +1,14 @@
 
-======================================
+=================================
 Project automation the Apiary way
-======================================
+=================================
 
 This is an internal tool for supporting development workflow inside `Apiary <http://apiary.io/>`_. However, we decided to open-source it. Feel free to fork it and use it on your own or inside your company.
 
 
---------------
+------------
 Installation
---------------
+------------
 
 ``pip install blackbelt`` if you can, ``easy_install blackbelt`` if
 you must (Mac OS X default).
@@ -38,9 +38,9 @@ and if it's working properly, put it into your :file:`~/.bashrc`::
 See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more information.
 
 
---------------
+---------
 Structure
---------------
+---------
 
 `bb` has subcommands that stand for an area of expertise. View help or command reference on how to use those.
 

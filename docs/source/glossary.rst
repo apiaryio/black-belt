@@ -1,7 +1,7 @@
 
-============
+========
 Glossary
-============
+========
 
 Terms used in this documentation.
 
