@@ -34,25 +34,45 @@ UA_STRING = "black-belt/%s" % VERSION
 
 PR_PHRASE_PREFIX = "Pull request for"
 
-
 def get_pr_info(pr_url):
     match = re.match(r".*github.com/(?P<owner>\S+)/{1}(?P<name>\S+)/pull/{1}(?P<number>\d+).*$", pr_url)
     if not match:
         raise ValueError("Cannot parse pull request URL, bad format")
     return match.groupdict()
 
+def get_pr_api_url(pr_url):
+    pr_info = get_pr_info(pr_url)
+    return "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
+
+def get_pr_details(pr_url):
+    return get_json_response(get_pr_api_url(pr_url))
+
+def get_branch_url(pr_details):
+    return "https://api.github.com/repos/%(repo_full_name)s/git/refs/heads/%(branch)s" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'branch': pr_details['head']['ref']
+    }
 
 def get_username():
     url = "https://api.github.com/user"
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
+    res = get_json_response(url)
+
+    return res['login']
+
+def get_request_headers():
+    return {
+        'Authorization': "token %s" % config['github']['access_token'],
+        'User-Agent': UA_STRING
     }
 
-    res = requests.get(url, headers=headers)
+def get_json_response(url):
+    r = requests.get(url, headers=get_request_headers())
 
-    return res.json()['login']
+    if r.status_code != 200:
+        raise ValueError("Request to URL %s failed with code %s: %s" % (url, r.status_code, r))
 
+    return r.json()
 
 def pull_request(card_url):
     """
@@ -93,11 +113,7 @@ def pull_request(card_url):
         'body': pr_description
     }
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
-    }
-
-    r = requests.post(url, data=json.dumps(payload), headers=headers)
+    r = requests.post(url, data=json.dumps(payload), headers=get_request_headers())
 
     if r.status_code != 201:
         print r.json()
@@ -118,16 +134,15 @@ def pull_request(card_url):
 
     webbrowser.open(pr_info['html_url'])
 
-
-def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
-    merge_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s/merge" % pr_info
+def verify_merge(pr_url, headers, max_waiting_time=30, retry_time=0.1):
+    merge_url = get_pr_api_url(pr_url) + "/merge"  # https://api.github.com/repos/apiaryio/apiary/pulls/1234/merge
     start_time = datetime.now()
     succeeded = False
 
     def do_request():
         r = requests.get(merge_url, headers=headers)
 
-        if (r.status_code == 404):
+        if r.status_code == 404:
             if datetime.now() < start_time + timedelta(seconds=max_waiting_time):
                 sleep(retry_time)
                 return False
@@ -142,7 +157,6 @@ def verify_merge(pr_info, headers, max_waiting_time=30, retry_time=0.1):
 
     while not succeeded:
         succeeded = do_request()
-
 
 def merge(pr_url):
     """
@@ -159,77 +173,140 @@ def merge(pr_url):
 
     """
 
-    pr_info = get_pr_info(pr_url)
+    pr_details = get_pr_details(pr_url)
 
-    pr_api_url = "https://api.github.com/repos/%(owner)s/%(name)s/pulls/%(number)s" % pr_info
+    # Check if PR is ready to merge - OPEN status
+    verify_pr_state(pr_details)
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token'],
-        'User-Agent': UA_STRING
-    }
+    # Check if required status checks passed for the PR
+    verify_pr_required_checks(pr_details)
 
-    r = requests.get(pr_api_url, headers=headers)
+    # Check if PR GitHub repository matches the current repository
+    verify_gh_repo(pr_details['base']['repo'])
 
-    if (r.status_code != 200):
-        raise ValueError("Cannot retrieve PR info with status code %s: %s" % (r.status_code, r))
+    # Check if master is ready; if not (e.g. failed, pending), confirm with the user
+    try:
+        verify_branch_required_checks(branch_name="master")
+    except ValueError:
+        click.confirm("The master branch hasn't passed the required checks. Do you still want to continue?", abort=True)
 
-    pr = r.json()
-
-    if pr['state'] != 'open':
-        raise ValueError("PR is %(state)s instead of still being open; not merging" % pr)
-
-    gh_repo = pr['base']['repo']
-
-    if get_github_repo() not in [
-        gh_repo['git_url'],
-        gh_repo['ssh_url'],
-        gh_repo['clone_url']
-    ]:
-        raise ValueError("The pull request is for the repository %s, while your origin is set up for %s" % (
-            gh_repo['git_url'], get_github_repo()
-        ))
-
-    sha = pr['head']['sha']
+    sha = pr_details['head']['sha']
 
     merge_sha = git_merge(
         sha=sha,
-        message="Merging pull request #%(number)s: %(title)s " % pr
+        message="Merging pull request #%(number)s: %(title)s " % pr_details
     )
 
-    verify_merge(pr_info, headers)
+    headers = get_request_headers()
+    verify_merge(pr_url, headers)
 
     # All good, delete branch
-    branch_url = "https://api.github.com/repos/%(owner)s/%(name)s/git/refs/heads/%(branch)s" % {
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'branch': pr['head']['ref']
+    branch_url = get_branch_url(pr_details)
 
-    }
     r = requests.delete(branch_url, headers=headers)
 
-    if (r.status_code != 204):
+    if r.status_code != 204:
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
-    print "#%(number)s merged!" % pr_info
-    post_message("[%(owner)s/%(name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'number': pr_info['number'],
-        'title': pr['title'],
-        'comments': pr['comments'],
-        'commits': pr['commits']
+    print "#%(number)s merged!" % pr_details
+
+    post_message("[%(repo_full_name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'number': pr_details['number'],
+        'title': pr_details['title'],
+        'comments': pr_details['comments'],
+        'commits': pr_details['commits']
     }, "#deploy-queue")
 
     return {
         'sha': merge_sha,
-        'owner': pr_info['owner'],
-        'name': pr_info['name'],
-        'number': pr_info['number'],
-        'description': pr['body'],
-        'html_url': pr['html_url'],
-        'title': pr['title'],
-        'branch': pr['head']['ref']
+        'owner': pr_details['base']['repo']['owner']['login'],
+        'name': pr_details['base']['repo']['name'],
+        'number': pr_details['number'],
+        'description': pr_details['body'],
+        'html_url': pr_details['html_url'],
+        'title': pr_details['title'],
+        'branch': pr_details['head']['ref']
     }
+
+def check_status(pr_url=None, branch_name=None, error_on_failure=False):
+    if not (pr_url or branch_name):
+        return
+
+    if pr_url:
+        pr_details = get_pr_details(pr_url)
+        try:
+            # Check if PR state is open
+            verify_pr_state(pr_details)
+            # Check if PR is ready (all required checks passed)
+            verify_pr_required_checks(pr_details)
+        except ValueError as exc:
+            if error_on_failure:
+                raise
+            else:
+                print exc.message
+
+    if branch_name:
+        try:
+            verify_branch_required_checks(branch_name)
+        except ValueError as exc:
+            if error_on_failure:
+                raise
+            else:
+                print exc.message
+
+def verify_pr_state(pr_details):
+    pr_state = pr_details['state']
+    message = "PR state: %s" % pr_state
+    if pr_state != 'open':
+        raise ValueError(message)
+
+    print message
+    return message
+
+def verify_pr_required_checks(pr_details):
+    status_url = "https://api.github.com/repos/%(repo_full_name)s/commits/%(head_sha)s/status" % {
+        'repo_full_name': pr_details['base']['repo']['full_name'],
+        'head_sha': pr_details['head']['sha']}
+
+    pr_checks_info = get_json_response(status_url)
+    message = "PR required checks (%(count)g): %(state)s" % {
+        'count': len(pr_checks_info['statuses']),
+        'state': pr_checks_info['state']}
+    if pr_checks_info['state'] != 'success':
+        raise ValueError(message)
+
+    print message
+    return message
+
+def verify_branch_required_checks(branch_name):
+    repo = get_github_repo()
+    repo_info = get_remote_repo_info(repo)
+
+    status_url = "https://api.github.com/repos/%(owner)s/%(name)s/commits/%(branch_name)s/status" % {
+        'owner': repo_info['owner'],
+        'name': repo_info['name'],
+        'branch_name': branch_name}
+    branch = get_json_response(status_url)
+    message = "Branch required checks (%(count)g): %(state)s" % {
+        'count': len(branch['statuses']),
+        'state': branch['state']}
+    if branch['state'] != 'success':
+        raise ValueError(message)
+
+    print message
+    return message
+
+def verify_gh_repo(pr_gh_repo):
+    origin_gh_repo = get_github_repo()
+
+    if origin_gh_repo not in [
+        pr_gh_repo['git_url'],
+        pr_gh_repo['ssh_url'],
+        pr_gh_repo['clone_url']
+    ]:
+            raise ValueError("The pull request is for the repository %s, while your origin is set up for %s" % (
+                pr_gh_repo['git_url'], origin_gh_repo))
 
 
 def get_pr_ticket_id(description):
@@ -238,7 +315,6 @@ def get_pr_ticket_id(description):
         raise ValueError("Can't find URL in the PR description")
 
     return match.groupdict()['id']
-
 
 def deploy(pr_url):
     """
@@ -258,7 +334,7 @@ def deploy(pr_url):
 
     """
     merge_info = merge(pr_url)
-    
+
     repo = get_github_repo()
     repo_info = get_remote_repo_info(repo)
 
@@ -310,14 +386,8 @@ def create_release(ref, payload, description, repo_info):
         'description': description
     }
 
-    headers = {
-        'Authorization': "token %s" % config['github']['access_token']
-    }
-
-    r = requests.post(url, data=json.dumps(body), headers=headers)
+    r = requests.post(url, data=json.dumps(body), headers=get_request_headers())
 
     if r.status_code != 201:
         print r.json()
         raise ValueError("Create github release ended with status code %s: %s" % (r.status_code, r))
-
-
