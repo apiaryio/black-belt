@@ -25,3 +25,7 @@ Terms used in this documentation.
 	Work Board
 	Work Overview
 		Trello board with deployeable tasks/units derived from User Story cards.
+
+	Work Card
+	Work Cards
+		Trello cards on :term:`Work Board` that describe a task/unit of work, derived from a user story.

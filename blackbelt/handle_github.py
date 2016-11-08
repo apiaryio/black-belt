@@ -230,6 +230,22 @@ def merge(pr_url):
     }
 
 def check_status(pr_url=None, branch_name=None, error_on_failure=False):
+    """
+    Returns status and required checks status of a given PR or branch.
+
+    This can be used to determine if a PR/branch can be merged without issues. Required checks might involve a status
+    of a CI build, status of code reviews, etc. (see https://help.github.com/articles/about-required-status-checks/)
+
+    Pull requests
+
+    #. Checks for Pull Request current state (open/closed)
+    #. Retrieves required checks status (success/failure/pending)
+
+    Branches
+
+    #. Retrieves required checks status (success/failure/pending)
+    """
+
     if not (pr_url or branch_name):
         return
 

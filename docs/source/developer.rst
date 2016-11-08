@@ -4,7 +4,7 @@
 Developer
 =========
 
-The :term:`Developer` processes :term:`Work Card`s, develops them and deploys them to production.
+The :term:`Developer` processes :term:`Work Cards`, develops them and deploys them to production.
 
 Those live on the :term:`Work Board`.
 
@@ -55,6 +55,12 @@ Code review
 -----------
 
 Code review ensures the quality of the code and disperses the knowledge about the code and features through the team.
+
+.. _check-status:
+
+.. autofunction:: blackbelt.commands.gh.status_command
+
+.. autofunction:: blackbelt.handle_github.check_status
 
 
 .. _pr-merge:
