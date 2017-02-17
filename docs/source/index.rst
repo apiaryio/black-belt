@@ -14,8 +14,7 @@ Installation
 you must (Mac OS X default).
 
 .. note::
-   Python 2.7 is assumed. Python 3.x is not supported at all.
-
+   Python 2.7 is assumed. Python 3.x is currently not supported at all.
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
@@ -36,6 +35,26 @@ and if it's working properly, put it into your :file:`~/.bashrc`::
 
 
 See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more information.
+
+
+-------
+Upgrade
+-------
+
+``pip install -U blackbelt``
+
+If you get error along the lines of::
+
+	OSError: [Errno 1] Operation not permitted: '/tmp/pip-IYiPfC-uninstall/
+
+you have a problem in your system installation (probably Mac OS X). You can either::
+
+	sudo pip install -U --ignore-installed blackbelt
+
+or::
+
+	pip uninstall blackbelt
+	pip install blackbelt
 
 
 ---------
