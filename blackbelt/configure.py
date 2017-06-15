@@ -114,7 +114,7 @@ def configure_blackbelt():
     get_token(
         group_name='slack',
         config=config,
-        token_url="https://api.slack.com/web"
+        token_url="https://api.slack.com/custom-integrations/legacy-tokens"
     )
 
     with open(expanduser('~/.blackbelt'), 'w') as f:
