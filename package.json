@@ -1,0 +1,43 @@
+{
+  "name": "black-belt",
+  "version": "1.0.0",
+  "description": "Project automation the Apiary way",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "engines": {
+    "node": ">= 6"
+  },
+  "scripts": {
+    "test": "mocha \"test/**/*-test.coffee\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apiaryio/black-belt.git"
+  },
+  "keywords": [
+    "automation"
+  ],
+  "author": "Apiary Czech Republic, spol. s r.o.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/apiaryio/black-belt/issues"
+  },
+  "homepage": "https://github.com/apiaryio/black-belt#readme",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "devDependencies": {
+    "conventional-changelog-lint": "^1.1.9",
+    "cz-conventional-changelog": "^2.0.0",
+    "semantic-release": "^6.3.2",
+    "sinon": "^2.1.0"
+  },
+  "dependencies": {
+    "yargs": "^8.0.2"
+  }
+}
