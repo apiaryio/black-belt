@@ -25,5 +25,6 @@ function assert_cmd_output_equals (expected_stdout, command) {
 }
 
 module.exports = {
-    assert_cmd_output_equals: assert_cmd_output_equals
+    assert_cmd_output_equals: assert_cmd_output_equals,
+    PROGRAM_NAME: PROGRAM_NAME
 }
