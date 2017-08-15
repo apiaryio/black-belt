@@ -11,7 +11,7 @@
     "node": ">= 6"
   },
   "scripts": {
-    "test": "mocha \"test/**/*-test.coffee\""
+    "test": "mocha \"test/**/*-test.js\""
   },
   "repository": {
     "type": "git",
@@ -32,10 +32,12 @@
     }
   },
   "devDependencies": {
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
     "conventional-changelog-lint": "^1.1.9",
     "cz-conventional-changelog": "^2.0.0",
-    "semantic-release": "^6.3.2",
-    "sinon": "^2.1.0"
+    "mocha": "^3.5.0",
+    "semantic-release": "^6.3.2"
   },
   "dependencies": {
     "yargs": "^8.0.2"
