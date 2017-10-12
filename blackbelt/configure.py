@@ -5,7 +5,7 @@ import webbrowser
 
 import click
 
-import handle_trello
+from blackbelt import handle_trello
 
 CONFIG_FILE = expanduser('~/.blackbelt')
 
