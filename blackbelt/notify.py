@@ -13,11 +13,11 @@ def notify(title, message):
                 'display notification "{}" with title "{}"'.format(message, title)
             ])
         except Exception:
-            print "[Can't notify user using osascript]"
+            print("[Can't notify user using osascript]")
 
     # libnotify (many Linux distros)
     elif exists('/usr/bin/notify-send'):
         try:
             check_call(['/usr/bin/notify-send', title, message])
         except Exception:
-            print "[Can't notify user using libnotify]"
+            print("[Can't notify user using libnotify]")

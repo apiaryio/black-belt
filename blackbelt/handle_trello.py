@@ -244,7 +244,7 @@ def schedule_list(story_card, story_list=None, owner=None, label=None):
         if label:
             api.label_card(card_id=card['id'], label=label)
 
-    print "Done"
+    print("Done")
 
 
 def infer_branch_name(url):
@@ -300,9 +300,9 @@ def move_to_deployed(card_id, comment=None):
     card = api.get_card(card_id=card_id)
 
     if card['idList'] != column['id']:
-        print "The card is not in column %(column)s. NOT moving to Deployed for you." % {
+        print("The card is not in column %(column)s. NOT moving to Deployed for you." % {
             'column': DEPLOY_QUEUE_NAME
-        }
+        })
     else:
 
         columns = api.get_columns(board_id=config['trello']['work_board_id'])
@@ -316,7 +316,7 @@ def move_to_deployed(card_id, comment=None):
                 break
 
         if not column:
-            print "Can't find \"Deployed by\" column, NOT moving the card for you"
+            print("Can't find \"Deployed by\" column, NOT moving the card for you")
         else:
             api.move_card(card_id=card_id, column_id=deployed['id'])
             if comment:
@@ -374,7 +374,7 @@ def verify(story_card):
                     checklist_cards.append(list_item)
 
                 elif list_item['state'] != u'complete':
-                    print "Unknown checklist state %s, skipping" % list_item['state']
+                    print("Unknown checklist state %s, skipping" % list_item['state'])
 
     # We have list of cards to check, go through them and discover whether
     # they are Deployed / Verified
@@ -454,7 +454,7 @@ def order_tea():
 
     text = get_tea_email(teas, me['fullName'])
 
-    print text.encode('utf-8')
+    print(text.encode('utf-8'))
 
     if click.confirm("Do you want to send the email above?"):
         email = me['email'] or 'no-reply@apiary.io'
