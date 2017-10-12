@@ -14,7 +14,7 @@ Installation
 you must (Mac OS X default).
 
 .. note::
-   Python 2.7 is assumed. Python 3.x is currently not supported at all.
+   Python 2.7 is assumed. Python 3.6+ support is experimental.
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
