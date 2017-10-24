@@ -386,7 +386,7 @@ def deploy(pr_url):
         ticket_id = get_pr_ticket_id(merge_info['description'])
         move_to_deployed(card_id=ticket_id, comment=comment)
     except ValueError:
-        if click.prompt("Moving card failed. Open PR in browser?", default=True):
+        if click.confirm("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
 
     create_release(ref=merge_info['branch'], payload='', description="Deployed to production", repo_info=repo_info)
