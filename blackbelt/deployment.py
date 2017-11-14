@@ -16,3 +16,4 @@ def deploy_production():
 
     check_call(['grunt', 'deploy'])
     check_call(['grunt', 'deploy', '--app=apiary-staging'])
+    check_call(['grunt', 'deploy', '--app=apiary-staging-qa'])
