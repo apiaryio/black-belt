@@ -5,14 +5,14 @@ import webbrowser
 
 import click
 
-import handle_trello
+from blackbelt import handle_trello
 
 CONFIG_FILE = expanduser('~/.blackbelt')
 
 
 def get_token(config, token_url, group_name, address_text="Please generate a token for yourself:"):
-    print '*' * 3 + ' ' + group_name + ' ' + '*' * 3
-    print address_text + ' ' + token_url
+    print('*' * 3 + ' ' + group_name + ' ' + '*' * 3)
+    print(address_text + ' ' + token_url)
 
     default_token = None
     if group_name in config and config[group_name]['access_token']:

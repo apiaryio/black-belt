@@ -6,7 +6,7 @@ options = environment.options
 NAME = 'blackbelt'
 VERSION = '0.13.1'
 
-requires = ['click', 'requests', 'PyGithub', 'slacker>=0.6.2', 'pyopenssl', 'ndg-httpsclient', 'pyasn1']
+requires = ['six', 'click', 'requests', 'PyGithub', 'slacker>=0.6.2', 'pyopenssl', 'ndg-httpsclient', 'pyasn1']
 
 setup(
     name=NAME,
@@ -49,6 +49,8 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: CPython",
         "Environment :: Console",
         "Topic :: Documentation",

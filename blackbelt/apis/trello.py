@@ -1,7 +1,8 @@
 import json
 import re
 import requests
-from urllib import quote, quote_plus
+
+from six.moves.urllib.parse import quote, quote_plus
 
 from blackbelt.config import config
 from blackbelt.errors import ConfigurationError

@@ -14,7 +14,7 @@ used and please provide all environment variables as well as locale settings.
 
 
 def get_github_repo():
-    return check_output(['git', 'config', '--get', 'remote.origin.url']).strip()
+    return check_output(['git', 'config', '--get', 'remote.origin.url']).strip().decode('utf-8')
 
 
 def get_remote_repo_info(github_repo_info):

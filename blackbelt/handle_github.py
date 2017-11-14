@@ -116,7 +116,7 @@ def pull_request(card_url):
     r = requests.post(url, data=json.dumps(payload), headers=get_request_headers())
 
     if r.status_code != 201:
-        print r.json()
+        print(r.json())
         raise ValueError("PR ended with status code %s: %s" % (r.status_code, r))
 
     get_ticket_ready(ticket)
@@ -127,10 +127,10 @@ def pull_request(card_url):
 
     comment_ticket(ticket, ticket_comment)
 
-    print "Pull request %(pr_id)s for trello card %(ticket_url)s send!" % {
+    print("Pull request %(pr_id)s for trello card %(ticket_url)s send!" % {
         'pr_id': pr_info['number'],
         'ticket_url': ticket['url']
-    }
+    })
 
     webbrowser.open(pr_info['html_url'])
 
@@ -208,7 +208,7 @@ def merge(pr_url):
     if r.status_code != 204:
         raise ValueError("Failed to delete branch after merging pull request, go do it manually")
 
-    print "#%(number)s merged!" % pr_details
+    print("#%(number)s merged!" % pr_details)
 
     post_message("[%(repo_full_name)s] Merged PR #%(number)s: %(title)s (%(commits)s commits, %(comments)s comments)" % {
         'repo_full_name': pr_details['base']['repo']['full_name'],
@@ -260,7 +260,7 @@ def check_status(pr_url=None, branch_name=None, error_on_failure=False):
             if error_on_failure:
                 raise
             else:
-                print exc.message
+                print(exc.message)
 
     if branch_name:
         try:
@@ -269,7 +269,7 @@ def check_status(pr_url=None, branch_name=None, error_on_failure=False):
             if error_on_failure:
                 raise
             else:
-                print exc.message
+                print(exc.message)
 
 def verify_pr_state(pr_details):
     pr_state = pr_details['state']
@@ -277,7 +277,7 @@ def verify_pr_state(pr_details):
     if pr_state != 'open':
         raise ValueError(message)
 
-    print message
+    print(message)
     return message
 
 def verify_pr_required_checks(pr_details):
@@ -292,7 +292,7 @@ def verify_pr_required_checks(pr_details):
     if pr_checks_info['state'] != 'success':
         raise ValueError(message)
 
-    print message
+    print(message)
     return message
 
 def verify_branch_required_checks(branch_name):
@@ -310,7 +310,7 @@ def verify_branch_required_checks(branch_name):
     if branch['state'] != 'success':
         raise ValueError(message)
 
-    print message
+    print(message)
     return message
 
 def verify_gh_repo(pr_gh_repo):
@@ -356,7 +356,7 @@ def deploy(pr_url):
 
     check_output(['grunt', 'create-slug'])
 
-    print "Waiting for tests to pass..."
+    print("Waiting for tests to pass...")
 
     ci_info = wait_for_tests(
         sha=merge_info['sha'],
@@ -370,7 +370,7 @@ def deploy(pr_url):
     notify('Apiary Deployment', "New version %s ready for deploy" % merge_info['sha'])
 
     # Insert newline
-    print ''
+    print('')
 
     click.confirm("Ready for deploy! Do you want me to deploy %s as the new version of Apiary?" % merge_info['sha'], abort=True)
 
@@ -405,5 +405,5 @@ def create_release(ref, payload, description, repo_info):
     r = requests.post(url, data=json.dumps(body), headers=get_request_headers())
 
     if r.status_code != 201:
-        print r.json()
+        print(r.json())
         raise ValueError("Create github release ended with status code %s: %s" % (r.status_code, r))
