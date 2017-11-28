@@ -355,6 +355,8 @@ def deploy(pr_url):
     repo_info = get_remote_repo_info(repo)
 
     check_output(['grunt', 'create-slug'])
+    check_output(['grunt', 'create-slug', '--app=apiary-staging-qa'])
+    check_output(['grunt', 'create-slug', '--app=apiary-staging-pre'])        
 
     print("Waiting for tests to pass...")
 
