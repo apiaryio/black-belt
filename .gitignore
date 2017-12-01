@@ -56,3 +56,7 @@ docs/_build/
 *.so
 /venv
 .eggs
+
+# Not to accidentally commit artifacts when developing
+licenses.txt
+list.txt
