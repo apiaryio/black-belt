@@ -1,4 +1,4 @@
-from nose.tools import assert_equals, assert_raises
+from nose.tools import assert_equal, assert_raises
 from mock import patch, MagicMock
 import requests
 import json
@@ -21,17 +21,17 @@ class TestGithubPullRequestParsing(object):
         self.parsed = get_pr_info(self.github_pr)
 
     def test_repo_owner(self):
-        assert_equals('apiaryio', self.parsed['owner'])
+        assert_equal('apiaryio', self.parsed['owner'])
 
     def test_repo_name(self):
-        assert_equals('apiary-test', self.parsed['name'])
+        assert_equal('apiary-test', self.parsed['name'])
 
     def test_pr_number(self):
-        assert_equals('123', self.parsed['number'])
+        assert_equal('123', self.parsed['number'])
 
     def test_files_link(self):
         parsed = get_pr_info(self.github_pr + '/files')
-        assert_equals('123', parsed['number'])
+        assert_equal('123', parsed['number'])
 
 
     def test_trello_id_extracted(self):
@@ -42,7 +42,7 @@ class TestGithubPullRequestParsing(object):
         Pull request for [Naming fixes](https://trello.com/c/yx2SNE3J/1910-naming-fixes).
         """)
 
-        assert_equals('yx2SNE3J', link)
+        assert_equal('yx2SNE3J', link)
 
     def test_error_on_bad_phrase(self):
         assert_raises(ValueError, lambda: get_pr_ticket_id("""
@@ -88,7 +88,7 @@ class TestStatusVerifications(object):
     def test_verify_branch_required_checks_success(self, get_method):
         get_method.return_value = self.init_mock(json_data_file='./test/gh-mock-response/ref-status-success.json')
         message = verify_branch_required_checks(self.branch_name)
-        assert_equals('Branch required checks (2): success', message)
+        assert_equal('Branch required checks (2): success', message)
 
     @patch.object(requests, 'get')
     def test_verify_branch_required_checks_failure(self, get_method):
@@ -99,7 +99,7 @@ class TestStatusVerifications(object):
     def test_verify_pr_status_success(self, get_method):
         get_method.return_value = self.init_mock(json_data_file='./test/gh-mock-response/pr-details-success.json')
         message = verify_pr_state(self.pr_details_open)
-        assert_equals('PR state: open', message)
+        assert_equal('PR state: open', message)
 
     @patch.object(requests, 'get')
     def test_verify_pr_status_failure(self, get_method):
@@ -110,7 +110,7 @@ class TestStatusVerifications(object):
     def test_verify_pr_required_checks_success(self, get_method):
         get_method.return_value = self.init_mock(json_data_file='./test/gh-mock-response/ref-status-success.json')
         message = verify_pr_required_checks(self.pr_details_open)
-        assert_equals('PR required checks (2): success', message)
+        assert_equal('PR required checks (2): success', message)
 
     @patch.object(requests, 'get')
     def test_verify_pr_required_checks_failure(self, get_method):
@@ -124,19 +124,19 @@ class TestGitHubPullRequestResponseData(object):
         with open('./test/gh-mock-response/pr-details-success.json') as json_data:
             pr_details = json.load(json_data)
 
-        assert_equals('octocat/Hello-World', pr_details['base']['repo']['full_name'])
-        assert_equals('new-topic', pr_details['head']['ref'])
-        assert_equals('git:github.com/octocat/Hello-World.git', pr_details['base']['repo']['git_url'])
-        assert_equals('git@github.com:octocat/Hello-World.git', pr_details['base']['repo']['ssh_url'])
-        assert_equals('https://github.com/octocat/Hello-World.git', pr_details['base']['repo']['clone_url'])
-        assert_equals('6dcb09b5b57875f334f61aebed695e2e4193db5e', pr_details['head']['sha'])
-        assert_equals('new-topic', pr_details['head']['ref'])
-        assert_equals(1347, pr_details['number'])
-        assert_equals('new-feature', pr_details['title'])
-        assert_equals(10, pr_details['comments'])
-        assert_equals(3, pr_details['commits'])
-        assert_equals('octocat', pr_details['base']['repo']['owner']['login'])
-        assert_equals('Hello-World', pr_details['base']['repo']['name'])
-        assert_equals('Please pull these awesome changes', pr_details['body'])
-        assert_equals('https://github.com/octocat/Hello-World/pull/1347', pr_details['html_url'])
-        assert_equals('open', pr_details['state'])
+        assert_equal('octocat/Hello-World', pr_details['base']['repo']['full_name'])
+        assert_equal('new-topic', pr_details['head']['ref'])
+        assert_equal('git:github.com/octocat/Hello-World.git', pr_details['base']['repo']['git_url'])
+        assert_equal('git@github.com:octocat/Hello-World.git', pr_details['base']['repo']['ssh_url'])
+        assert_equal('https://github.com/octocat/Hello-World.git', pr_details['base']['repo']['clone_url'])
+        assert_equal('6dcb09b5b57875f334f61aebed695e2e4193db5e', pr_details['head']['sha'])
+        assert_equal('new-topic', pr_details['head']['ref'])
+        assert_equal(1347, pr_details['number'])
+        assert_equal('new-feature', pr_details['title'])
+        assert_equal(10, pr_details['comments'])
+        assert_equal(3, pr_details['commits'])
+        assert_equal('octocat', pr_details['base']['repo']['owner']['login'])
+        assert_equal('Hello-World', pr_details['base']['repo']['name'])
+        assert_equal('Please pull these awesome changes', pr_details['body'])
+        assert_equal('https://github.com/octocat/Hello-World/pull/1347', pr_details['html_url'])
+        assert_equal('open', pr_details['state'])
