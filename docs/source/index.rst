@@ -13,8 +13,12 @@ Installation
 ``pip install blackbelt`` if you can, ``easy_install blackbelt`` if
 you must (Mac OS X default).
 
+MacOs and Python3 need use `Homebrew  <https://brew.sh/>`_
+
+``brew install python3 && pip3 install blackbelt``
+
 .. note::
-   Python 2.7 is assumed. Python 3.6+ support is experimental.
+   Python 3.6+ is default now and Python 2.7 will be deprecated.
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
