@@ -22,14 +22,14 @@ class TestLicenseTextParsing(object):
 
     def test_basic(self):
         assert_equal(parse_license_text('''
-            Copyright 2009–2014 Contributors. All rights reserved.
+            Copyright 2009-2014 Contributors. All rights reserved.
 
             Permission is hereby granted,
             free of charge...
 
             ...paragraph
         '''), (
-            'Copyright 2009–2014 Contributors. All rights reserved.',
+            'Copyright 2009-2014 Contributors. All rights reserved.',
             'Permission is hereby granted, free of charge...\n\n...paragraph',
         ))
 

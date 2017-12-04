@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import re
 import os
 import json
@@ -84,12 +87,12 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     click.secho('\n{name}@{version}'.format(**details), bold=True, fg=color)
     click.echo((
         'License: {licenses}\n'
-        'Dependencies: {count}\n'
+        'Dependencies: {dependencies}\n'
         'Elligible for Pre-Approval: {pre_approval_verdict}'
     ).format(
-        count=len(fourth_party_licenses),
+        licenses=details['licenses'],
+        dependencies=len(fourth_party_licenses),
         pre_approval_verdict=pre_approval_verdict,
-        **details,
     ))
 
     problematic_licenses = [
