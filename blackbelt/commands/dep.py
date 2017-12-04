@@ -23,16 +23,13 @@ def validate_dep(ctx, param, dep):
 
 @cli.command()
 @click.argument('dep', callback=validate_dep)
+@click.option('--dev/--no-dev', default=False,
+              help='Whether to include dev dependencies.')
 @click.option('--list-path', type=click.File(mode='w'),
               default=lambda: os.path.join(os.getcwd(), 'list.txt'),
-              help='Where to save the list of 4th party deps')
+              help='Where to save the list of 4th party deps.')
 @click.option('--licenses-path', type=click.File(mode='w'),
               default=lambda: os.path.join(os.getcwd(), 'licenses.txt'),
-              help='Where to save the Public License field contents')
+              help='Where to save the Public License field contents.')
 def check(*args, **kwargs):
-    """
-    Usage::
-
-        bb dep check react@16.2
-    """
     do_check(*args, **kwargs)

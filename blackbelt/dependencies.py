@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import shutil
 import tempfile
 import subprocess
 import itertools
@@ -24,13 +25,19 @@ for key in LICENSE_CHECKER_FORMAT_KEYS:
 
 # https://confluence.oraclecorp.com/confluence/display/CORPARCH/Licenses+Eligible+for+Pre-Approval+-+Internal+and+Hosted+Use
 # https://confluence.oraclecorp.com/confluence/display/CORPARCH/Licenses+Eligible+for+Pre-Approval+-+Distribution
+# https://spdx.org/licenses/
 LICENSES_DISTRIBUTED = [
-    'ISC', 'MIT', 'BSD', 'Apache',
-    'ISC*', 'MIT*', 'BSD*', 'Apache*'
+    'Apache-1.1', 'Apache-2.0', '0BSD', 'BSD', 'BSD-2-Clause', 'BSD-3-Clause',
+    'ISC', 'MIT', 'PHP-3.0', 'UPL', 'UPL-1.0', 'ZPL-2.0', 'Unlicense',
+    'Python-2.0',
 ]
+LICENSES_DISTRIBUTED += [license + '*' for license in LICENSES_DISTRIBUTED]
+
+MISSING_COPYRIGHT_NOTICE_WARNING = '!!! MISSING COPYRIGHT NOTICE !!!'
+MISSING_LICENSE_TEXT_WARNING = '!!! MISSING LICENSE !!!'
 
 
-def check(dep, list_path, licenses_path):
+def check(dep, list_path, licenses_path, dev=False):
     """
     Checks the dependency for licenses and vulnerabilities before you can
     add it to the Third-Party Approval Process:
@@ -45,6 +52,10 @@ def check(dep, list_path, licenses_path):
         - List of licenses not eligible for Pre-Approval
         - List of known vulnerabilities (TODO)
 
+    Example::
+
+        bb dep check react@16.2
+
     Requirements:
 
     - npm install -g license-checker
@@ -56,7 +67,7 @@ def check(dep, list_path, licenses_path):
 
     click.echo('Analyzing the package...')
     with tempfile.TemporaryDirectory() as tmp_dir:
-        run(['npm', 'install', dep], cwd=tmp_dir)
+        install(dep, tmp_dir, dev=dev)
         licenses = license_checker(tmp_dir)
 
     pre_approval_verdict = get_pre_approval_verdict(licenses)
@@ -79,15 +90,61 @@ def check(dep, list_path, licenses_path):
         **details,
     ))
 
-    problematic_licenses = filter_problematic_licenses(licenses)
+    problematic_licenses = [
+        details for details in licenses.values()
+        if details['not_pre_approved_reasons']
+    ]
     if problematic_licenses:
-        click.secho('\nProblematic Dependencies', bold=True, fg=color)
-        click.echo(create_deps_list(problematic_licenses))
+        heading = '\nProblematic Dependencies: {0}'.format(len(problematic_licenses))
+        click.secho(heading, bold=True, fg=color)
+        missing = False
+
+        for details in problematic_licenses:
+            reasons = ', '.join(details['not_pre_approved_reasons'])
+            missing = missing or 'missing' in reasons
+
+            line = click.style('{name} {version} ({licenses})'.format(**details), bold=True)
+            line += ' - ' + reasons
+            click.echo(line)
+
+        if missing:
+            click.secho((
+                '\nBad luck. Before adding the dependency to the approval '
+                'process you need to manually go through the dependencies, '
+                'get the missing info and complete the generated files '
+                'with it.'
+            ), fg=color)
+
+
+def install(dep, project_dir, dev=False):
+    click.echo('Getting dependencies...')
+    run(['npm', 'install', dep], cwd=project_dir)
+    if dev:
+        click.echo('Getting dev dependencies...')
+        name = parse_dep(dep)[0]
+        shutil.copy(
+            os.path.join(project_dir, 'node_modules', name, 'package.json'),
+            os.path.join(project_dir),
+        )
+
+        package_json = os.path.join(project_dir, 'package.json')
+        with open(package_json) as f:
+            package_data = json.load(f)
+
+        package_data_just_deps = {}
+        for key, value in package_data.items():
+            if 'dependencies' in key.lower():
+                package_data_just_deps[key] = value
+        with open(package_json, 'w') as f:
+            json.dump(package_data_just_deps, f)
+
+        run(['npm', 'install'], cwd=project_dir)
 
 
 def get_pre_approval_verdict(licenses):
     return all(
-        details['pre_approved'] for details in licenses.values()
+        not details['not_pre_approved_reasons']
+        for details in licenses.values()
     )
 
 
@@ -158,16 +215,6 @@ def separate_top_level_details(licenses, top_level_dep):
     return (top_level_details, fourth_party_licenses)
 
 
-def filter_problematic_licenses(licenses):
-    problematic_licenses = {}
-
-    for dep, details in licenses.items():
-        if not details['pre_approved']:
-            problematic_licenses[dep] = details
-
-    return problematic_licenses
-
-
 def license_checker(project_dir):
     format_file = os.path.join(project_dir, 'format.json')
     with open(format_file, 'w') as f:
@@ -179,14 +226,18 @@ def license_checker(project_dir):
     data = {}
     for package, details in json.loads(output).items():
         copyright_notice, license_text = parse_license_text(details.get('licenseText'))
-        data[package] = {
+        license_names = parse_license_names(details.get('licenses'))
+
+        details = {
             'name': details.get('name'),
             'version': details.get('version'),
-            'license_text': license_text,
-            'copyright_notice': copyright_notice,
-            'licenses': details.get('licenses').lstrip('(').rstrip(')'),
-            'pre_approved': details.get('licenses') in LICENSES_DISTRIBUTED,
+            'license_text': license_text or MISSING_LICENSE_TEXT_WARNING,
+            'copyright_notice': copyright_notice or MISSING_COPYRIGHT_NOTICE_WARNING,
+            'licenses': license_names,
         }
+        details['not_pre_approved_reasons'] = check_pre_approval_elligibility(details)
+
+        data[package] = details
     return data
 
 
@@ -235,6 +286,18 @@ def parse_dep(dep):
         return (split_result[0], 'latest')
 
 
+def parse_license_names(value):
+    try:
+        return value.lstrip('(').rstrip(')')
+    except AttributeError:
+        # Someone is using the deprecated 'licenses' field, we got a list.
+        # Since we have no idea whether these licenses should be written
+        # with OR, AND, ... let's join it by commas.
+        #
+        # See also https://docs.npmjs.com/files/package.json#license
+        return ', '.join(filter(None, value))
+
+
 def parse_license_text(text):
     copyright_notice = None
     license_text = None
@@ -258,3 +321,14 @@ def remove_newlines_keep_paragraps(match):
     if len(newlines) > 1:
         return ''.join(newlines[:2])
     return ' '
+
+
+def check_pre_approval_elligibility(details):
+    reasons = []
+    if not details['licenses'] in LICENSES_DISTRIBUTED:
+        reasons.append('license not pre-approved')
+    if details['copyright_notice'] == MISSING_COPYRIGHT_NOTICE_WARNING:
+        reasons.append('missing copyright notice')
+    if details['license_text'] == MISSING_LICENSE_TEXT_WARNING:
+        reasons.append('missing full license text')
+    return reasons
