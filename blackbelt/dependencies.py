@@ -44,7 +44,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
 
     #. Installs the dependency in a temporary directory
     #. Checks licenses
-    #. Checks for PATENTS files (TODO)
+    #. Checks for ``PATENTS`` files (TODO)
     #. Provides you with:
 
         - The list of 4th party deps for the Technology Usage Note field
@@ -58,12 +58,12 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
 
     Requirements:
 
-    - npm install -g license-checker
-    - npm install -g licensecheck (TODO: licensecheck --once --dev --tsv)
-    - npm install -g nsp (TODO: nsp check)
-    - npm install -g snyk && snyk auth (TODO: snyk test)
+    - ``npm install -g license-checker``
+    - ``npm install -g licensecheck`` (TODO: ``licensecheck --once --dev --tsv``)
+    - ``npm install -g nsp`` (TODO: ``nsp check``)
+    - ``npm install -g snyk && snyk auth`` (TODO: ``snyk test``)
     """
-    check_executables(['npm', 'license-checker'])
+    ensure_executables(['npm', 'license-checker'])
 
     click.echo('Analyzing the package...')
     dep_name, dep_version = dep
@@ -251,7 +251,7 @@ def license_checker(project_dir):
     return licenses
 
 
-def check_executables(executables):
+def ensure_executables(executables):
     for executable in executables:
         try:
             # check=False, because some programs return non-zero status when
