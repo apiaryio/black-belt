@@ -2,7 +2,7 @@ import os
 
 import click
 
-from blackbelt.dependencies import check as do_check, parse_dep
+from blackbelt.dependencies import check as do_check, run, parse_dep
 
 
 @click.group(help='Dependency management')
@@ -12,19 +12,21 @@ def cli():
 
 def validate_dep(ctx, param, dep):
     try:
-        package_name, package_version = parse_dep(dep)
+        dep_name, dep_version = parse_dep(dep)
     except Exception:
         raise click.BadParameter('The dependency format should be e.g. react@16.2')
     else:
-        if package_version == 'latest':
-            raise click.BadParameter('Dependency must have a version number, e.g. react@16.2')
-        return '{0}@{1}'.format(package_name, package_version)
+        if dep_version == 'latest':
+            dep_version = run(['npm', 'view', dep_name, 'version'])
+        return (dep_name, dep_version)
 
 
 @cli.command()
 @click.argument('dep', callback=validate_dep)
 @click.option('--dev/--no-dev', default=False,
               help='Whether to include dev dependencies.')
+@click.option('--debug/--no-debug', default=False,
+              help='Print debug information.')
 @click.option('--list-path', type=click.File(mode='w'),
               default=lambda: os.path.join(os.getcwd(), 'list.txt'),
               help='Where to save the list of 4th party deps.')

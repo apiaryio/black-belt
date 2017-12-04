@@ -27,9 +27,9 @@ for key in LICENSE_CHECKER_FORMAT_KEYS:
 # https://confluence.oraclecorp.com/confluence/display/CORPARCH/Licenses+Eligible+for+Pre-Approval+-+Distribution
 # https://spdx.org/licenses/
 LICENSES_DISTRIBUTED = [
-    'Apache-1.1', 'Apache-2.0', '0BSD', 'BSD', 'BSD-2-Clause', 'BSD-3-Clause',
-    'ISC', 'MIT', 'PHP-3.0', 'UPL', 'UPL-1.0', 'ZPL-2.0', 'Unlicense',
-    'Python-2.0',
+    'Apache', 'Apache-1.1', 'Apache-2.0', '0BSD', 'BSD', 'BSD-2-Clause',
+    'BSD-3-Clause', 'ISC', 'MIT', 'PHP-3.0', 'UPL', 'UPL-1.0', 'ZPL-2.0',
+    'Unlicense', 'Python-2.0', 'FreeBSD', 'Apache License, Version 2.0',
 ]
 LICENSES_DISTRIBUTED += [license + '*' for license in LICENSES_DISTRIBUTED]
 
@@ -37,7 +37,7 @@ MISSING_COPYRIGHT_NOTICE_WARNING = '!!! MISSING COPYRIGHT NOTICE !!!'
 MISSING_LICENSE_TEXT_WARNING = '!!! MISSING LICENSE !!!'
 
 
-def check(dep, list_path, licenses_path, dev=False):
+def check(dep, list_path, licenses_path, dev=False, debug=False):
     """
     Checks the dependency for licenses and vulnerabilities before you can
     add it to the Third-Party Approval Process:
@@ -49,7 +49,7 @@ def check(dep, list_path, licenses_path, dev=False):
 
         - The list of 4th party deps for the Technology Usage Note field
         - The contents of the Public License field
-        - List of licenses not eligible for Pre-Approval
+        - List of packages not eligible for Pre-Approval
         - List of known vulnerabilities (TODO)
 
     Example::
@@ -66,12 +66,14 @@ def check(dep, list_path, licenses_path, dev=False):
     check_executables(['npm', 'license-checker'])
 
     click.echo('Analyzing the package...')
+    dep_name, dep_version = dep
+
     with tempfile.TemporaryDirectory() as tmp_dir:
-        install(dep, tmp_dir, dev=dev)
+        install(dep_name, dep_version, tmp_dir, dev=dev)
         licenses = license_checker(tmp_dir)
 
     pre_approval_verdict = get_pre_approval_verdict(licenses)
-    details, fourth_party_licenses = separate_top_level_details(licenses, dep)
+    details, fourth_party_licenses = separate_top_level_details(licenses, dep_name)
 
     click.echo('Creating the list of 4th party deps...')
     list_path.write(create_deps_list(fourth_party_licenses))
@@ -82,10 +84,10 @@ def check(dep, list_path, licenses_path, dev=False):
     click.secho('\n{name}@{version}'.format(**details), bold=True, fg=color)
     click.echo((
         'License: {licenses}\n'
-        'Dependencies: {deps_count}\n'
+        'Dependencies: {count}\n'
         'Elligible for Pre-Approval: {pre_approval_verdict}'
     ).format(
-        deps_count=len(fourth_party_licenses),
+        count=len(fourth_party_licenses),
         pre_approval_verdict=pre_approval_verdict,
         **details,
     ))
@@ -95,7 +97,7 @@ def check(dep, list_path, licenses_path, dev=False):
         if details['not_pre_approved_reasons']
     ]
     if problematic_licenses:
-        heading = '\nProblematic Dependencies: {0}'.format(len(problematic_licenses))
+        heading = '\nProblematic Licenses: {0}'.format(len(problematic_licenses))
         click.secho(heading, bold=True, fg=color)
         missing = False
 
@@ -107,23 +109,32 @@ def check(dep, list_path, licenses_path, dev=False):
             line += ' - ' + reasons
             click.echo(line)
 
+            if debug:
+                click.echo(' ・ npm: https://www.npmjs.com/package/{0}'.format(details['name']))
+                if details.get('repo'):
+                    click.echo(' ・ repo: {0}'.format(details['repo']))
+                if details.get('license_file'):
+                    click.echo(' ・ license file: {0}'.format(details['license_file']))
+
         if missing:
-            click.secho((
-                '\nBad luck. Before adding the dependency to the approval '
+            click.echo(
+                '\nBad luck! Before adding the dependency to the approval '
                 'process you need to manually go through the dependencies, '
                 'get the missing info and complete the generated files '
                 'with it.'
-            ), fg=color)
+            )
+        if not debug:
+            click.echo('\nProTip: You can use --debug to print more details.')
 
 
-def install(dep, project_dir, dev=False):
+def install(dep_name, dep_version, project_dir, dev=False):
     click.echo('Getting dependencies...')
+    dep = '{0}@{1}'.format(dep_name, dep_version)
     run(['npm', 'install', dep], cwd=project_dir)
     if dev:
         click.echo('Getting dev dependencies...')
-        name = parse_dep(dep)[0]
         shutil.copy(
-            os.path.join(project_dir, 'node_modules', name, 'package.json'),
+            os.path.join(project_dir, 'node_modules', dep_name, 'package.json'),
             os.path.join(project_dir),
         )
 
@@ -199,18 +210,17 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
     return separator.join(sections) + separator
 
 
-def separate_top_level_details(licenses, top_level_dep):
-    top_level_name = parse_dep(top_level_dep)[0]
-    top_level_details = None
+def separate_top_level_details(licenses, dep_name):
+    dep_details = None
     fourth_party_licenses = []
 
     for details in licenses:
-        if details['name'] == top_level_name:
-            top_level_details = details
+        if details['name'] == dep_name:
+            dep_details = details
         else:
             fourth_party_licenses.append(details)
 
-    return (top_level_details, fourth_party_licenses)
+    return (dep_details, fourth_party_licenses)
 
 
 def license_checker(project_dir):
@@ -227,10 +237,12 @@ def license_checker(project_dir):
         license_names = parse_license_names(details.get('licenses'))
 
         details = {
-            'name': details.get('name'),
-            'version': details.get('version'),
-            'license_text': license_text or MISSING_LICENSE_TEXT_WARNING,
+            'name': details['name'],
+            'version': details['version'],
+            'repo': details.get('repository'),
+            'license_file': parse_license_filename(details['name'], details.get('licenseFile')),
             'copyright_notice': copyright_notice or MISSING_COPYRIGHT_NOTICE_WARNING,
+            'license_text': license_text or MISSING_LICENSE_TEXT_WARNING,
             'licenses': license_names,
         }
         details['not_pre_approved_reasons'] = check_pre_approval_elligibility(details)
@@ -244,7 +256,7 @@ def check_executables(executables):
         try:
             # check=False, because some programs return non-zero status when
             # they print --version output
-            run([executable, '--version'], check=False, silent=True)
+            run([executable, '--version'], check=False)
         except FileNotFoundError:
             if executable == 'npm':
                 msg = "'npm' is needed, but it's not installed."
@@ -260,28 +272,17 @@ def check_executables(executables):
 
 
 # Unfortunately, we cannot use subprocess.run(), because BB still supports Py2
-def run(args, silent=False, cwd=None, check=True):
+def run(args, cwd=None, check=True):
     kwargs = {'cwd': cwd}
     try:
         with open(os.devnull, 'w') as devnull:
-            if silent:
-                kwargs['stdout'] = devnull
-                kwargs['stderr'] = devnull
-                return subprocess.check_call(args, **kwargs)
-            else:
-                kwargs['stderr'] = devnull
-                return subprocess.check_output(args, **kwargs)
+            kwargs['stderr'] = devnull
+            output = subprocess.check_output(args, **kwargs)
     except subprocess.CalledProcessError:
         if check:
             raise
-
-
-def parse_dep(dep):
-    split_result = re.split(r'==|@', dep)
-    try:
-        return (split_result[0], split_result[1])
-    except IndexError:
-        return (split_result[0], 'latest')
+    else:
+        return output.decode().strip()
 
 
 def parse_license_names(value):
@@ -314,6 +315,15 @@ def parse_license_text(text):
     return (copyright_notice, license_text)
 
 
+def parse_license_filename(dep_name, path):
+    if path:
+        try:
+            return path.split('node_modules')[1].lstrip('/')
+        except IndexError:
+            return path
+    return None
+
+
 def remove_newlines_keep_paragraps(match):
     newlines = re.findall(r'\r\n|\n', match.group(0))
     if len(newlines) > 1:
@@ -330,3 +340,11 @@ def check_pre_approval_elligibility(details):
     if details['license_text'] == MISSING_LICENSE_TEXT_WARNING:
         reasons.append('missing full license text')
     return reasons
+
+
+def parse_dep(dep):
+    split_result = re.split(r'==|@', dep)
+    try:
+        return (split_result[0], split_result[1])
+    except IndexError:
+        return (split_result[0], 'latest')
