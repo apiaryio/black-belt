@@ -91,7 +91,7 @@ def check(dep, list_path, licenses_path, dev=False):
     ))
 
     problematic_licenses = [
-        details for details in licenses.values()
+        details for details in licenses
         if details['not_pre_approved_reasons']
     ]
     if problematic_licenses:
@@ -142,17 +142,14 @@ def install(dep, project_dir, dev=False):
 
 
 def get_pre_approval_verdict(licenses):
-    return all(
-        not details['not_pre_approved_reasons']
-        for details in licenses.values()
-    )
+    return all(not details['not_pre_approved_reasons'] for details in licenses)
 
 
 def create_deps_list(licenses):
-    lines = []
-    for dep, details in licenses.items():
-        lines.append('{name} {version} ({licenses})'.format(**details))
-    return '\n'.join(lines)
+    return '\n'.join([
+        '{name} {version} ({licenses})'.format(**details)
+        for details in licenses
+    ])
 
 
 # See https://confluence.oraclecorp.com/confluence/display/CORPARCH/Third-Party+Approval+FAQ
@@ -172,7 +169,7 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
     def key_fn(details):
         return details['license_text']
 
-    licenses = sorted(fourth_party_licenses.values(), key=key_fn)
+    licenses = sorted(fourth_party_licenses, key=key_fn)
     identical_license_groups = itertools.groupby(licenses, key_fn)
 
     for license_text, details_list in identical_license_groups:
@@ -203,14 +200,15 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
 
 
 def separate_top_level_details(licenses, top_level_dep):
+    top_level_name = parse_dep(top_level_dep)[0]
     top_level_details = None
-    fourth_party_licenses = {}
+    fourth_party_licenses = []
 
-    for dep, details in licenses.items():
-        if dep.startswith(top_level_dep):
+    for details in licenses:
+        if details['name'] == top_level_name:
             top_level_details = details
         else:
-            fourth_party_licenses[dep] = details
+            fourth_party_licenses.append(details)
 
     return (top_level_details, fourth_party_licenses)
 
@@ -223,8 +221,8 @@ def license_checker(project_dir):
     args = ['--unknown', '--json', '--customPath', format_file]
     output = run(['license-checker'] + args, cwd=project_dir)
 
-    data = {}
-    for package, details in json.loads(output).items():
+    licenses = []
+    for details in json.loads(output).values():
         copyright_notice, license_text = parse_license_text(details.get('licenseText'))
         license_names = parse_license_names(details.get('licenses'))
 
@@ -237,8 +235,8 @@ def license_checker(project_dir):
         }
         details['not_pre_approved_reasons'] = check_pre_approval_elligibility(details)
 
-        data[package] = details
-    return data
+        licenses.append(details)
+    return licenses
 
 
 def check_executables(executables):
