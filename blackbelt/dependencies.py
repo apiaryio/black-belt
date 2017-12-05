@@ -109,7 +109,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             missing = missing or 'missing' in reasons
 
             line = click.style('{name} {version} ({licenses})'.format(**details), bold=True)
-            click.echo('{0} - {1}'.format(line, reasons)
+            click.echo('{0} - {1}'.format(line, reasons))
 
             if debug:
                 click.echo(' ・ npm: https://www.npmjs.com/package/{0}'.format(details['name']))
