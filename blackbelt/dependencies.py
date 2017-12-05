@@ -23,9 +23,7 @@ LICENSE_CHECKER_FORMAT_KEYS = [
 ]
 
 # https://github.com/davglass/license-checker#custom-format
-LICENSE_CHECKER_FORMAT = {}
-for key in LICENSE_CHECKER_FORMAT_KEYS:
-    LICENSE_CHECKER_FORMAT[key] = None
+LICENSE_CHECKER_FORMAT = {key: None for key in LICENSE_CHECKER_FORMAT_KEYS}
 
 # Search Oracle wiki for 'Licenses Eligible for Pre-Approval - Distribution'
 # List of official license codes: https://spdx.org/licenses/
