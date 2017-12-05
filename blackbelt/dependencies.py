@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import subprocess
 import itertools
+import operator
 
 import click
 
@@ -26,9 +27,8 @@ LICENSE_CHECKER_FORMAT = {}
 for key in LICENSE_CHECKER_FORMAT_KEYS:
     LICENSE_CHECKER_FORMAT[key] = None
 
-# https://confluence.oraclecorp.com/confluence/display/CORPARCH/Licenses+Eligible+for+Pre-Approval+-+Internal+and+Hosted+Use
-# https://confluence.oraclecorp.com/confluence/display/CORPARCH/Licenses+Eligible+for+Pre-Approval+-+Distribution
-# https://spdx.org/licenses/
+# Search Oracle wiki for 'Licenses Eligible for Pre-Approval - Distribution'
+# List of official license codes: https://spdx.org/licenses/
 LICENSES_DISTRIBUTED = [
     'Apache', 'Apache-1.1', 'Apache-2.0', '0BSD', 'BSD', 'BSD-2-Clause',
     'BSD-3-Clause', 'ISC', 'MIT', 'PHP-3.0', 'UPL', 'UPL-1.0', 'ZPL-2.0',
@@ -109,8 +109,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             missing = missing or 'missing' in reasons
 
             line = click.style('{name} {version} ({licenses})'.format(**details), bold=True)
-            line += ' - ' + reasons
-            click.echo(line)
+            click.echo('{0} - {1}'.format(line, reasons)
 
             if debug:
                 click.echo(' ・ npm: https://www.npmjs.com/package/{0}'.format(details['name']))
@@ -166,8 +165,7 @@ def create_deps_list(licenses):
     ])
 
 
-# See https://confluence.oraclecorp.com/confluence/display/CORPARCH/Third-Party+Approval+FAQ
-# and search for following questions:
+# See the internal FAQ and search for following questions:
 #
 # - What information is required in the Public License field?
 # - What's the best way to format all the information in the Public
@@ -180,9 +178,7 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
     sections.append(top_level_details['copyright_notice'])
     sections.append(top_level_details['license_text'])
 
-    def key_fn(details):
-        return details['license_text']
-
+    key_fn = operator.attrgetter('license_text')
     licenses = sorted(fourth_party_licenses, key=key_fn)
     identical_license_groups = itertools.groupby(licenses, key_fn)
 
@@ -318,6 +314,13 @@ def parse_license_text(text):
     return (copyright_notice, license_text)
 
 
+def remove_newlines_keep_paragraps(match):
+    newlines = re.findall(r'\r\n|\n', match.group(0))
+    if len(newlines) > 1:
+        return ''.join(newlines[:2])
+    return ' '
+
+
 def parse_license_filename(dep_name, path):
     if path:
         try:
@@ -325,13 +328,6 @@ def parse_license_filename(dep_name, path):
         except IndexError:
             return path
     return None
-
-
-def remove_newlines_keep_paragraps(match):
-    newlines = re.findall(r'\r\n|\n', match.group(0))
-    if len(newlines) > 1:
-        return ''.join(newlines[:2])
-    return ' '
 
 
 def check_pre_approval_elligibility(details):
