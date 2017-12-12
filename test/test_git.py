@@ -1,4 +1,4 @@
-from nose.tools import assert_equals, assert_raises
+from nose.tools import assert_equal, assert_raises
 
 from blackbelt.git import get_remote_repo_info
 
@@ -11,10 +11,10 @@ class TestGithubRepoGitAddressParsing(object):
         self.parsed = get_remote_repo_info(self.github_repo)
 
     def test_repo_owner(self):
-        assert_equals('apiaryio', self.parsed['owner'])
+        assert_equal('apiaryio', self.parsed['owner'])
 
     def test_repo_name(self):
-        assert_equals('apiary-test', self.parsed['name'])
+        assert_equal('apiary-test', self.parsed['name'])
 
 
 class TestGithubRepoHttpsAddressParsing(object):
@@ -25,7 +25,7 @@ class TestGithubRepoHttpsAddressParsing(object):
         self.parsed = get_remote_repo_info(self.github_repo)
 
     def test_repo_owner(self):
-        assert_equals('apiaryio', self.parsed['owner'])
+        assert_equal('apiaryio', self.parsed['owner'])
 
     def test_repo_name(self):
-        assert_equals('apiary-test', self.parsed['name'])
+        assert_equal('apiary-test', self.parsed['name'])
