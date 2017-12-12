@@ -176,7 +176,7 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
     sections.append(top_level_details['copyright_notice'])
     sections.append(top_level_details['license_text'])
 
-    key_fn = operator.attrgetter('license_text')
+    key_fn = operator.itemgetter('license_text')
     licenses = sorted(fourth_party_licenses, key=key_fn)
     identical_license_groups = itertools.groupby(licenses, key_fn)
 
