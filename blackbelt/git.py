@@ -25,11 +25,11 @@ def get_remote_repo_info(github_repo_info):
 
 
 def get_current_branch():
-    return subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+    return subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
 
 
 def get_current_sha():
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
 
 
 def merge(sha, message):
