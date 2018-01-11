@@ -36,20 +36,5 @@ class TestGitBranchOutput(object):
 
     @patch('subprocess.check_output')
     def test_branch_name_parsing(self, check_output_mock):
-        branch_name = 'prefix/branch-name'
-        if (version_info[0] == 3):
-            check_output_mock.return_value = bytes(branch_name, 'utf-8')
-        else:
-            check_output_mock.return_value = str(branch_name)
-
-        assert_equal(branch_name, get_current_branch())
-
-    @patch('subprocess.check_output')
-    def test_branch_name_parsing_with_trailing_whitespace(self, check_output_mock):
-        branch_name = 'prefix/branch-name'
-        if (version_info[0] == 3):
-            check_output_mock.return_value = bytes(branch_name+'\n', 'utf-8')
-        else:
-            check_output_mock.return_value = str(branch_name+'\n')
-
-        assert_equal(branch_name, get_current_branch())
+        check_output_mock.return_value = b'prefix/branch-name\n'
+        assert_equal('prefix/branch-name', get_current_branch())
