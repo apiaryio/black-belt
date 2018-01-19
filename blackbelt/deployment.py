@@ -5,7 +5,7 @@ from blackbelt.messages import post_message
 
 
 def deploy_staging():
-    branch_name = str(get_current_branch())
+    branch_name = get_current_branch()
 
     post_message("Deploying branch %s to staging" % branch_name, "#deploy-queue")
 

@@ -1,6 +1,7 @@
 from nose.tools import assert_equal, assert_raises
-
-from blackbelt.git import get_remote_repo_info
+from mock import patch
+from sys import version_info
+from blackbelt.git import get_remote_repo_info, get_current_branch
 
 
 class TestGithubRepoGitAddressParsing(object):
@@ -29,3 +30,11 @@ class TestGithubRepoHttpsAddressParsing(object):
 
     def test_repo_name(self):
         assert_equal('apiary-test', self.parsed['name'])
+
+
+class TestGitBranchOutput(object):
+
+    @patch('subprocess.check_output')
+    def test_branch_name_parsing(self, check_output_mock):
+        check_output_mock.return_value = b'prefix/branch-name\n'
+        assert_equal('prefix/branch-name', get_current_branch())

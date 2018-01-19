@@ -1,5 +1,5 @@
 import re
-from subprocess import check_output
+import subprocess
 
 
 """
@@ -14,7 +14,7 @@ used and please provide all environment variables as well as locale settings.
 
 
 def get_github_repo():
-    return check_output(['git', 'config', '--get', 'remote.origin.url']).strip().decode('utf-8')
+    return subprocess.check_output(['git', 'config', '--get', 'remote.origin.url']).strip().decode('utf-8')
 
 
 def get_remote_repo_info(github_repo_info):
@@ -25,23 +25,23 @@ def get_remote_repo_info(github_repo_info):
 
 
 def get_current_branch():
-    return check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip()
+    return subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
 
 
 def get_current_sha():
-    return check_output(['git', 'rev-parse', 'HEAD']).strip()
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
 
 
 def merge(sha, message):
     """ Merge given SHA into the master and return merge commit SHA """
 
     if get_current_branch() != 'master':
-        check_output(['git', 'checkout', 'master'])
+        subprocess.check_output(['git', 'checkout', 'master'])
 
-    check_output(['git', 'pull'])
+    subprocess.check_output(['git', 'pull'])
 
-    check_output(['git', 'merge', sha, '-m', message])
+    subprocess.check_output(['git', 'merge', sha, '-m', message])
 
-    check_output(['git', 'push', 'origin', 'master'])
+    subprocess.check_output(['git', 'push', 'origin', 'master'])
 
     return get_current_sha()
