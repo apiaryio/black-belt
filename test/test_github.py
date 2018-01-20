@@ -1,4 +1,4 @@
-from nose.tools import assert_equal, assert_raises
+from nose.tools import assert_equal, assert_raises, assert_not_equal
 from mock import patch, MagicMock
 import requests
 import json
@@ -10,6 +10,7 @@ from blackbelt.handle_github import (
     verify_pr_state,
     verify_pr_required_checks,
     verify_branch_required_checks,
+    run_grunt_in_parallel,
 )
 
 
@@ -140,3 +141,13 @@ class TestGitHubPullRequestResponseData(object):
         assert_equal('Please pull these awesome changes', pr_details['body'])
         assert_equal('https://github.com/octocat/Hello-World/pull/1347', pr_details['html_url'])
         assert_equal('open', pr_details['state'])
+
+class TestParallelRunOfGruntTasks(object):
+
+    def test_run_grunt_in_parallel_success(self):
+        commands = (['sleep', '1'], ['sleep', '1'], ['sleep', '2'])
+        assert_equal(0, run_grunt_in_parallel(commands))
+
+    def test_run_grunt_in_parallel_fail(self):
+        commands = (['sleep', '1'], ['sleep', '1'], ['ls', '/dev/null/a'])
+        assert_not_equal(0, run_grunt_in_parallel(commands))
