@@ -438,11 +438,11 @@ def run_grunt_in_parallel(grunt_commands):
                 next_round.append(command)
             else:
                 if rc == 0:
-                    print('Deploy to {} completed successfully.\n'.format(command['app']))
+                    print('Grunt task for {} completed successfully.\n'.format(command['app']))
                     os.remove(command['log'])
                 else:
                     return_code = rc
-                    print('Deploy to {} failed with exit code {}.'.format(command['app'], rc))
+                    print('Grunt task for {} failed with exit code {}.'.format(command['app'], rc))
                     print('Logfile can be found at {}\n'.format(command['log']))
 
         commands = next_round
