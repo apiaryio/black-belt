@@ -14,9 +14,14 @@ def deploy_staging():
 def deploy_production():
     post_message("Deploying to production", "#deploy-queue")
 
-    slug_creaction_rc = run_grunt_in_parallel((['grunt', 'create-slug'], ['grunt', 'create-slug', '--app=apiary-staging-pre'], ['grunt', 'create-slug', '--app=apiary-staging-qa']))
-    if slug_creaction_rc != 0:
-		post_message("Slug creation failed, deploy stopped.", "#deploy-queue")
+    slug_creaction_return_code = run_grunt_in_parallel((
+        ['grunt', 'create-slug'],
+        ['grunt', 'create-slug', '--app=apiary-staging-pre'],
+        ['grunt', 'create-slug', '--app=apiary-staging-qa'],
+    ))
+
+    if slug_creaction_return_code != 0:
+        post_message("Slug creation failed, deploy stopped.", "#deploy-queue")
         raise ValueError("One of the slug creations failed. Check output few lines above.")
 
     check_output(['grunt', 'deploy-slug', '--app=apiary-staging-qa'])
