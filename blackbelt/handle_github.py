@@ -10,6 +10,7 @@ import requests
 
 import tempfile
 import os
+import re
 
 from .config import config
 from .handle_trello import (
@@ -423,7 +424,7 @@ def run_grunt_in_parallel(grunt_commands):
     commands = []
     for command in grunt_commands:
         with tempfile.NamedTemporaryFile(delete=False) as f:
-            app = command[2].split('=')[1] if len(command) > 2 else 'production'
+            app = get_grunt_application_name(' '.join(command))
             commands.append({'app': app, 'process': Popen(command, stdout=f), 'log': f.name})
             print('Running `{}` with PID {}'.format(' '.join(command), commands[-1]['process'].pid))
 
@@ -448,3 +449,9 @@ def run_grunt_in_parallel(grunt_commands):
 
 
     return return_code
+
+def get_grunt_application_name(command):
+    app_search = re.search("(--app=|-a=)(\w+)", command, re.IGNORECASE)
+    app = app_search.group(2) if app_search else "production"
+
+    return app

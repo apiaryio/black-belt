@@ -11,6 +11,7 @@ from blackbelt.handle_github import (
     verify_pr_required_checks,
     verify_branch_required_checks,
     run_grunt_in_parallel,
+    get_grunt_application_name,
 )
 
 
@@ -151,3 +152,8 @@ class TestParallelRunOfGruntTasks(object):
     def test_run_grunt_in_parallel_fail(self):
         commands = (['sleep', '1'], ['sleep', '1'], ['ls', '/dev/null/a'])
         assert_not_equal(0, run_grunt_in_parallel(commands))
+
+    def test_get_grun_application_name(self):
+        assert_equal('apiary', get_grunt_application_name('grunt create-slug --app=apiary'))
+        assert_equal('apiary', get_grunt_application_name('grunt create-slug -a=apiary'))
+        assert_equal('production', get_grunt_application_name('grunt create-slug'))
