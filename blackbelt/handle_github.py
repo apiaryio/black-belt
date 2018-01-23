@@ -431,6 +431,7 @@ def run_grunt_in_parallel(grunt_commands):
     print('\n')
 
     while len(commands):
+        sleep(5)
         next_round = []
         for command in commands:
             rc = command['process'].poll()
