@@ -48,8 +48,15 @@ Issuing Pull Request
 
 .. autofunction:: blackbelt.commands.gh.pr_command
 
-.. autofunction:: blackbelt.handle_github.pull_request
-   
+.. autofunction:: blackbelt.dependencies.pull_request
+
+Checking Dependencies
+^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: blackbelt.commands.dep.check
+
+.. autofunction:: blackbelt.handle_github.check
+
 -----------
 Code review
 -----------
