@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 import click
 
@@ -17,7 +18,10 @@ def validate_dep(ctx, param, dep):
         raise click.BadParameter('The dependency format should be e.g. react@16.2')
     else:
         if dep_version == 'latest':
-            dep_version = run(['npm', 'view', dep_name, 'version'])
+            try:
+                dep_version = run(['npm', 'view', dep_name, 'version'])
+            except subprocess.CalledProcessError:
+                raise click.BadParameter('The npm package does not exist')
         return (dep_name, dep_version)
 
 

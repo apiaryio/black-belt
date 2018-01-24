@@ -70,15 +70,18 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     dep_name, dep_version = dep
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        install(dep_name, dep_version, tmp_dir, dev=dev)
+        try:
+            install(dep_name, dep_version, tmp_dir, dev=dev)
+        except subprocess.CalledProcessError:
+            raise click.BadParameter('The npm package could not be installed')
         licenses = license_checker(tmp_dir)
 
     pre_approval_verdict = get_pre_approval_verdict(licenses)
     details, fourth_party_licenses = separate_top_level_details(licenses, dep_name)
 
-    click.echo('Creating the list of 4th party deps...')
+    click.echo('Creating the list of 4th party deps... {}'.format(list_path.name))
     list_path.write(create_deps_list(fourth_party_licenses))
-    click.echo('Creating the Public License field contents...')
+    click.echo('Creating the Public License field contents... {}'.format(licenses_path.name))
     licenses_path.write(create_licenses_list(details, fourth_party_licenses))
 
     color = 'green' if pre_approval_verdict else 'red'
