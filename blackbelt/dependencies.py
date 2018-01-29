@@ -72,7 +72,9 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
             install(dep_name, dep_version, tmp_dir, dev=dev)
-        except subprocess.CalledProcessError:
+        except Exception as e:
+            if debug:
+                raise
             raise click.BadParameter('The npm package could not be installed')
         licenses = license_checker(tmp_dir)
 
