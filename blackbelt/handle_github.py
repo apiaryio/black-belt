@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
 import json
 import re
-from subprocess import check_output
+from subprocess import check_output, Popen
 from time import sleep
 import webbrowser
 
 import click
 import requests
+
+import tempfile
+import os
+import re
 
 from .config import config
 from .handle_trello import (
@@ -354,9 +358,9 @@ def deploy(pr_url):
     repo = get_github_repo()
     repo_info = get_remote_repo_info(repo)
 
-    check_output(['grunt', 'create-slug'])
-    check_output(['grunt', 'create-slug', '--app=apiary-staging-qa'])
-    check_output(['grunt', 'create-slug', '--app=apiary-staging-pre'])        
+    slug_creaction_rc = run_grunt_in_parallel((['grunt', 'create-slug'], ['grunt', 'create-slug', '--app=apiary-staging-pre'], ['grunt', 'create-slug', '--app=apiary-staging-qa']))
+    if slug_creaction_rc != 0:
+        raise ValueError("One of the slug creations failed. Check output few lines above.")
 
     print("Waiting for tests to pass...")
 
@@ -380,6 +384,8 @@ def deploy(pr_url):
 
     sleep(15)
 
+    check_output(['grunt', 'deploy-slug', '--app=apiary-staging-qa'])
+    check_output(['grunt', 'deploy-slug', '--app=apiary-staging-pre'])
     check_output(['grunt', 'deploy-slug'])
 
     comment = "Deployed by me with version %s. Please verify it works." % merge_info['sha']
@@ -409,3 +415,44 @@ def create_release(ref, payload, description, repo_info):
     if r.status_code != 201:
         print(r.json())
         raise ValueError("Create github release ended with status code %s: %s" % (r.status_code, r))
+
+def run_grunt_in_parallel(grunt_commands):
+    """ Helper function to run grunt commands (e.g. deploy or slug manipulation) for multiple environments in parallel"""
+
+    return_code = 0
+
+    commands = []
+    for command in grunt_commands:
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            app = get_grunt_application_name(' '.join(command))
+            commands.append({'app': app, 'process': Popen(command, stdout=f), 'log': f.name})
+            print('Running `{}` with PID {}'.format(' '.join(command), commands[-1]['process'].pid))
+
+    print('\n')
+
+    while len(commands):
+        sleep(5)
+        next_round = []
+        for command in commands:
+            rc = command['process'].poll()
+            if rc == None:
+                next_round.append(command)
+            else:
+                if rc == 0:
+                    print('Grunt task for {} completed successfully.\n'.format(command['app']))
+                    os.remove(command['log'])
+                else:
+                    return_code = rc
+                    print('Grunt task for {} failed with exit code {}.'.format(command['app'], rc))
+                    print('Logfile can be found at {}\n'.format(command['log']))
+
+        commands = next_round
+
+
+    return return_code
+
+def get_grunt_application_name(command):
+    app_search = re.search("(--app=|-a=)(\w+)", command, re.IGNORECASE)
+    app = app_search.group(2) if app_search else "production"
+
+    return app
