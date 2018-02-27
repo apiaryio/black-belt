@@ -1,8 +1,10 @@
 import os
+import subprocess
 
 import click
+import requests
 
-from blackbelt.dependencies import check as do_check, run, parse_dep
+from blackbelt.dependencies import check as do_check, parse_dep
 
 
 @click.group(help='Dependency management')
@@ -17,7 +19,17 @@ def validate_dep(ctx, param, dep):
         raise click.BadParameter('The dependency format should be e.g. react@16.2')
     else:
         if dep_version == 'latest':
-            dep_version = run(['npm', 'view', dep_name, 'version'])
+            try:
+                response = requests.get('https://api.npms.io/v2/package/' + dep_name)
+                response.raise_for_status()
+                dep_version = response.json()['collected']['metadata']['version']
+            except requests.HTTPError as e:
+                if e.response.status_code == 404:
+                    raise click.BadParameter('The npm package does not exist')
+                else:
+                    if ctx.params.get('debug'):
+                        raise
+                    raise click.Abort('Unable to figure out the package version')
         return (dep_name, dep_version)
 
 
