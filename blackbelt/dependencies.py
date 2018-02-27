@@ -90,12 +90,18 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     click.secho('\n{name}@{version}'.format(**details), bold=True, fg=color)
     click.echo((
         'License: {licenses}\n'
+        'Copyright Notice: {copyright_notice}\n'
         'Dependencies: {dependencies}\n'
-        'Elligible for Pre-Approval: {pre_approval_verdict}'
+        'Elligible for Pre-Approval: {pre_approval_verdict}\n\n'
+        'Package: https://npmjs.com/package/{name}\n'
+        'Repo: {repo}\n'
     ).format(
         licenses=details['licenses'],
+        copyright_notice=details['copyright_notice'],
         dependencies=len(fourth_party_licenses),
         pre_approval_verdict=pre_approval_verdict,
+        name=details['name'],
+        repo=details.get('repo', 'N/A'),
     ))
 
     problematic_licenses = [
@@ -130,6 +136,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             )
         if not debug:
             click.echo('\nProTip: You can use --debug to print more details.')
+    return pre_approval_verdict
 
 
 def install(dep_name, dep_version, project_dir, dev=False):

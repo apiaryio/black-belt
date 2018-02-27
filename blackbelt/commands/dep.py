@@ -1,5 +1,5 @@
 import os
-import subprocess
+import sys
 
 import click
 import requests
@@ -46,4 +46,5 @@ def validate_dep(ctx, param, dep):
               default=lambda: os.path.join(os.getcwd(), 'licenses.txt'),
               help='Where to save the Public License field contents.')
 def check(*args, **kwargs):
-    do_check(*args, **kwargs)
+    if not do_check(*args, **kwargs):
+        sys.exit(1)
