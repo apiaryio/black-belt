@@ -1,4 +1,4 @@
-from subprocess import check_call
+from subprocess import check_call, check_output
 
 from blackbelt.handle_github import get_current_branch, run_grunt_in_parallel
 from blackbelt.messages import post_message
