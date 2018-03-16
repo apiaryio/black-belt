@@ -119,7 +119,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             reasons = ', '.join(details['not_pre_approved_reasons'])
             missing = missing or 'missing' in reasons
 
-            line = click.style('{name} {version} ({licenses})'.format(**details), bold=True)
+            line = click.style('{name}@{version} ({licenses})'.format(**details), bold=True)
             click.echo('{0} - {1}'.format(line, reasons))
 
             if debug:
@@ -172,7 +172,7 @@ def get_pre_approval_verdict(licenses):
 
 def create_deps_list(licenses):
     return '\n'.join([
-        '{name} {version} ({licenses})'.format(**details)
+        '{name}@{version} ({licenses})'.format(**details)
         for details in licenses
     ])
 
@@ -198,7 +198,7 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
         details_list = list(details_list)
         if len(details_list) == 1:
             section = (
-                '{name} {version} ({licenses})\n'
+                '{name}@{version} ({licenses})\n'
                 '{copyright_notice}\n'
                 '{license_text}'
             ).format(**details_list[0])
@@ -206,13 +206,13 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
         else:
             for details in details_list:
                 section = (
-                    '{name} {version} ({licenses})\n'
+                    '{name}@{version} ({licenses})\n'
                     '{copyright_notice}'
                 ).format(**details)
                 sections.append(section)
 
             section = ''.join([
-                '{name} {version}\n'.format(**details)
+                '{name}@{version}\n'.format(**details)
                 for details in details_list
             ]) + '\n' + license_text
             sections.append(section)
