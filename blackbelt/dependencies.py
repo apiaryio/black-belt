@@ -9,7 +9,6 @@ import tempfile
 import subprocess
 import itertools
 import operator
-import datetime
 
 import click
 
@@ -345,10 +344,7 @@ def create_copyright_notice(pkg_data):
     if not author:
         return None
     try:
-        copyright_notice = 'Copyright (c) {year} {name}'.format(
-            year=datetime.datetime.now().year,
-            name=author['name'],
-        )
+        copyright_notice = 'Copyright (c) {name}'.format(name=author['name'])
         if author.get('email'):
             copyright_notice += ' <{email}>'.format(email=author['email'])
         return copyright_notice
