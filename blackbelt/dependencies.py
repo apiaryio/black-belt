@@ -316,6 +316,17 @@ def parse_license_text(text):
     license_text = (text or '').strip()
     copyright_notice = detect_copyright_notice(license_text, require_year=True)
 
+    # If the license doesn't contain any of the following words, it's suspicius
+    # and should be classified as "rubbish" (sometimes the license-checker picks
+    # up a README file without any real license text).
+    license_text_lc = license_text.lower()
+    if (
+        'software' not in license_text_lc and
+        'copyright' not in license_text_lc and
+        'license' not in license_text_lc
+    ):
+        return (None, None)
+
     if 'Apache License' in license_text:
         return (copyright_notice, license_text)
 
