@@ -93,6 +93,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
         'Copyright Notice: {copyright_notice}\n'
         'Dependencies: {dependencies}\n'
         'Elligible for Pre-Approval: {pre_approval_verdict}\n\n'
+        'Description: {description}\n'
         'Package: https://npmjs.com/package/{name}\n'
         'Repo: {repo}\n'
     ).format(
@@ -100,8 +101,9 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
         copyright_notice=details['copyright_notice'],
         dependencies=len(fourth_party_licenses),
         pre_approval_verdict=pre_approval_verdict,
+        description=details.get('description') or 'N/A',
         name=details['name'],
-        repo=details.get('repo', 'N/A'),
+        repo=details.get('repo') or 'N/A',
     ))
 
     problematic_licenses = [
@@ -117,7 +119,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             reasons = ', '.join(details['not_pre_approved_reasons'])
             missing = missing or 'missing' in reasons
 
-            line = click.style('{name} {version} ({licenses})'.format(**details), bold=True)
+            line = click.style('{name}@{version} ({licenses})'.format(**details), bold=True)
             click.echo('{0} - {1}'.format(line, reasons))
 
             if debug:
@@ -170,7 +172,7 @@ def get_pre_approval_verdict(licenses):
 
 def create_deps_list(licenses):
     return '\n'.join([
-        '{name} {version} ({licenses})'.format(**details)
+        '{name}@{version} ({licenses})'.format(**details)
         for details in licenses
     ])
 
@@ -196,7 +198,7 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
         details_list = list(details_list)
         if len(details_list) == 1:
             section = (
-                '{name} {version} ({licenses})\n'
+                '{name}@{version} ({licenses})\n'
                 '{copyright_notice}\n'
                 '{license_text}'
             ).format(**details_list[0])
@@ -204,13 +206,13 @@ def create_licenses_list(top_level_details, fourth_party_licenses):
         else:
             for details in details_list:
                 section = (
-                    '{name} {version} ({licenses})\n'
+                    '{name}@{version} ({licenses})\n'
                     '{copyright_notice}'
                 ).format(**details)
                 sections.append(section)
 
             section = ''.join([
-                '{name} {version}\n'.format(**details)
+                '{name}@{version}\n'.format(**details)
                 for details in details_list
             ]) + '\n' + license_text
             sections.append(section)
@@ -242,15 +244,19 @@ def license_checker(project_dir):
 
     licenses = []
     for details in json.loads(output).values():
+        with open(os.path.join(details['path'], 'package.json')) as f:
+            pkg_data = json.load(f)
+
         copyright_notice, license_text = parse_license_text(details.get('licenseText'))
         license_names = parse_license_names(details.get('licenses'))
 
         details = {
             'name': details['name'],
             'version': details['version'],
+            'description': pkg_data.get('description'),
             'repo': details.get('repository'),
             'license_file': parse_license_filename(details['name'], details.get('licenseFile')),
-            'copyright_notice': copyright_notice or MISSING_COPYRIGHT_NOTICE_WARNING,
+            'copyright_notice': copyright_notice or create_copyright_notice(pkg_data) or MISSING_COPYRIGHT_NOTICE_WARNING,
             'license_text': license_text or MISSING_LICENSE_TEXT_WARNING,
             'licenses': license_names,
         }
@@ -307,21 +313,54 @@ def parse_license_names(value):
 
 
 def parse_license_text(text):
-    copyright_notice = None
-    license_text = None
+    license_text = (text or '').strip()
+    copyright_notice = detect_copyright_notice(license_text, require_year=True)
 
-    for line in (text or '').splitlines():
-        if re.search(r'copyright|\(c\)|©', line, re.I):
-            copyright_notice = line.strip()
-            break
+    # If the license doesn't contain any of the following words, it's suspicius
+    # and should be classified as "rubbish" (sometimes the license-checker picks
+    # up a README file without any real license text).
+    license_text_lc = license_text.lower()
+    if (
+        'software' not in license_text_lc and
+        'copyright' not in license_text_lc and
+        'license' not in license_text_lc
+    ):
+        return (None, None)
 
+    if 'Apache License' in license_text:
+        return (copyright_notice, license_text)
+
+    copyright_notice = detect_copyright_notice(license_text)
     if copyright_notice:
         license_text = text.split(copyright_notice)[1]
         license_text = license_text.strip()
         license_text = re.sub(r' +', ' ', license_text)
         license_text = re.sub(r' ?(\r\n|\n)+ ?', remove_newlines_keep_paragraps, license_text)
-
     return (copyright_notice, license_text)
+
+
+def detect_copyright_notice(copyright_text, require_year=False):
+    for line in copyright_text.splitlines():
+        line = line.strip()
+        if re.search(r'copyright|\(c\)|©', line, re.I):
+            if not require_year:
+                return line
+            elif re.search(r'\d{4}', line):
+                return line
+    return None
+
+
+def create_copyright_notice(pkg_data):
+    author = pkg_data.get('author')
+    if not author:
+        return None
+    try:
+        copyright_notice = 'Copyright (c) {name}'.format(name=author['name'])
+        if author.get('email'):
+            copyright_notice += ' <{email}>'.format(email=author['email'])
+        return copyright_notice
+    except (KeyError, AttributeError):
+        return None
 
 
 def remove_newlines_keep_paragraps(match):
