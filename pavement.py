@@ -6,7 +6,7 @@ options = environment.options
 NAME = 'blackbelt'
 VERSION = '0.15.10'
 
-requires = ['six', 'click', 'requests', 'PyGithub', 'slacker>=0.6.2', 'pyopenssl', 'ndg-httpsclient', 'pyasn1']
+requires = ['six', 'click', 'requests', 'PyGithub', 'slacker>=0.6.2', 'pyopenssl', 'ndg-httpsclient', 'pyasn1', 'twine']
 
 setup(
     name=NAME,
@@ -119,5 +119,5 @@ def release():
     sh("git tag -s '%(name)s-%(version)s' -m 'Version bump to %(version)s'" % {'name': NAME, 'version': VERSION})
     sh("git push --tags")
     sh("git push")
-    sh("python setup.py register sdist upload")
-    sh("python setup.py bdist_wheel upload")
+    sh("python setup.py sdist bdist_wheel")
+    sh("twine upload dist/*%s*" % VERSION)
