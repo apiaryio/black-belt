@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+six = "*"
+click = "*"
+requests = "*"
+PyGithub = "*"
+slacker = ">=0.6.2"
+pyOpenSSL = "*"
+ndg-httpsclient = "*"
+"pyasn1" = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"

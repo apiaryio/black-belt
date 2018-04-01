@@ -7,17 +7,31 @@ Black belt is collection of scripts, tools and guidelines used for developing pr
 
 Please refer to [The Black Belt Documentation](http://black-belt.readthedocs.org/).
 
+```
+$ brew install pipenv
+```
+or
+
+```
+$ sudo apt install software-properties-common python-software-properties
+$ sudo add-apt-repository ppa:pypa/ppa
+$ sudo apt update
+$ sudo apt install pipenv
+```
+
+Otherwise, just use pip:
+
+```
+$ pip install pipenv
+```
+
 
 ## If you want to develop black-belt...
 
-`virtualenv` assumed (`sudo pip install virtualenv`) and Python 2.7
+Install all dependencies for a project (including dev):
 
 ```
-virtualenv --python=/usr/local/bin/python2.7 venv
-source venv/bin/activate
-pip install paver
-pip install -r requirements-development.txt
-paver develop
+pipenv install --dev
 paver test
 ```
 
