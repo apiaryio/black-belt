@@ -3,9 +3,8 @@ python:
   - "2.7"
   - "3.6"
 install:
-    - pip install -r requirements.txt
-    - pip install -r requirements-test.txt
-    - pip install paver
+    - pip install pipenv
+    - pipenv install --dev
 script: paver test
 notifications:
   email: false
