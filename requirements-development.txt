@@ -3,3 +3,4 @@ setuptools>=0.9
 wheel>=0.21
 nose
 mock
+twine
