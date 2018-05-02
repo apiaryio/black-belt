@@ -29,7 +29,7 @@ def validate_dep(ctx, param, dep):
                 else:
                     if ctx.params.get('debug'):
                         raise
-                    raise click.Abort('Unable to figure out the package version')
+                    raise click.ClickException('Unable to figure out the package version. See --debug for more information.')
         return (dep_name, dep_version)
 
 
