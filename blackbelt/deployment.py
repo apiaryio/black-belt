@@ -27,3 +27,11 @@ def deploy_production():
     check_output(['grunt', 'deploy-slug', '--app=apiary-staging-qa'])
     check_output(['grunt', 'deploy-slug', '--app=apiary-staging-pre'])
     check_output(['grunt', 'deploy-slug'])
+
+def rollback_production():
+
+    post_message("Rollback production for all environments (prod, qa, pre)", "#deploy-queue")
+
+    check_call(['grunt', 'rollback', '--app=apiary-staging-qa'])
+    check_call(['grunt', 'rollback', '--app=apiary-staging-pre'])
+    check_call(['grunt', 'rollback'])
