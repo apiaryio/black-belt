@@ -10,15 +10,18 @@ This is an internal tool for supporting development workflow inside `Apiary <htt
 Installation
 ------------
 
-``pip install blackbelt`` if you can, ``easy_install blackbelt`` if
-you must (Mac OS X default).
+On macOS, the easiest way to install blackbelt is via `Homebrew  <https://brew.sh/>`_::
 
-MacOs and Python3 need use `Homebrew  <https://brew.sh/>`_
+	$ brew install apiaryio/formulae/blackbelt
 
-``brew install python3 && pip3 install blackbelt``
+On other platforms you can install Blackbelt with ``pip install blackbelt`` providing you have Python and pip installed. Consult your platform for documentation on how to install Python and pip.
 
 .. note::
    Python 3.6+ is default now and Python 2.7 will be deprecated.
+
+-----
+Setup
+-----
 
 With that, you should have ``bb`` command. Run interactive ``bb init`` and follow instructions. This is going to connect to services we are using in Apiary for futher interaction:
 
@@ -45,7 +48,14 @@ See `click's documentation <http://click.pocoo.org/3/bashcomplete/>`_ for more i
 Upgrade
 -------
 
-``pip install -U blackbelt``
+If you used Homebrew on macOS, use::
+
+	$ brew update
+	$ brew upgrade
+
+Otherwise::
+
+	$ pip install -U blackbelt
 
 If you get error along the lines of::
 
