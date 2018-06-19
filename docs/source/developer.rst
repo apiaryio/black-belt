@@ -103,6 +103,24 @@ This:
 
 #. Informs others on Slack
 #. Deploys master to production using ``grunt deploy``
+#. Deploys master to production using ``grunt deploy --app=apiary-staging-qa``
+#. Deploys master to production using ``grunt deploy --app=apiary-staging-pre``
+
+Rollback production
+~~~~~~~~~~~~~~~~~~~
+
+.. _rollback-production:
+
+Rollback production to previous version with::
+
+  bb rollback
+
+This:
+
+#. Informs others on Slack
+#. Rollback production using ``grunt rollback``
+#. Rollback staging-qa using ``grunt rollback --app=apiary-staging-qa``
+#. Rollback staging-pre using ``grunt rollback --app=apiary-staging-pre``
 
 
 -------
