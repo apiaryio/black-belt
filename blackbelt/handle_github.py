@@ -397,7 +397,7 @@ def deploy(pr_url):
         if click.confirm("Moving card failed. Open PR in browser?", default=True):
             webbrowser.open(merge_info['html_url'])
 
-    create_release(ref=merge_info['branch'], payload='', description="Deployed to production", repo_info=repo_info)
+    create_release(ref=merge_info['sha'], payload='', description="Deployed to production", repo_info=repo_info)
 
 def create_release(ref, payload, description, repo_info):
     """ Create release in github after deploy to production """
