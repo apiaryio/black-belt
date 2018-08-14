@@ -14,6 +14,8 @@ def cli():
 
 def validate_dep(ctx, param, dep):
     try:
+        if dep == '.': # check the current project_dir
+            return (dep, '*')
         dep_name, dep_version = parse_dep(dep)
     except Exception:
         raise click.BadParameter('The dependency format should be e.g. react@16.2')

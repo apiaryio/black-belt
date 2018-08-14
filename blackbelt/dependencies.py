@@ -69,14 +69,22 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     click.echo('Analyzing the package...')
     dep_name, dep_version = dep
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        try:
-            install(dep_name, dep_version, tmp_dir, dev=dev)
-        except Exception as e:
-            if debug:
-                raise
-            raise click.BadParameter('The npm package could not be installed')
-        licenses = license_checker(tmp_dir)
+    if dep_name == '.': # check the `pwd` project deps
+        project_dir = '.'
+        package_json = os.path.join(project_dir, 'package.json')
+        with open(package_json) as f:
+            package_data = json.load(f)
+        dep_name = package_data['name'];
+        licenses = license_checker(project_dir)
+    else:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            try:
+                install(dep_name, dep_version, tmp_dir, dev=dev)
+            except Exception as e:
+                if debug:
+                    raise
+                raise click.BadParameter('The npm package could not be installed')
+            licenses = license_checker(tmp_dir)
 
     pre_approval_verdict = get_pre_approval_verdict(licenses)
     details, fourth_party_licenses = separate_top_level_details(licenses, dep_name)
