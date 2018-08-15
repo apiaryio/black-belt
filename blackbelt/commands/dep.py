@@ -13,9 +13,12 @@ def cli():
 
 
 def validate_dep(ctx, param, dep):
+    if os.path.isdir(dep): # check the provided project_dir
+        click.echo('The dependency is a local directory, using whatever is currently in node_modules')
+        if not os.path.isdir(os.path.join(dep, 'node_modules')):
+            raise click.BadParameter("There are no node_modules to analyze in the '{}' project directory".format(dep))
+        return (dep, None)
     try:
-        if dep == '.': # check the current project_dir
-            return (dep, '*')
         return parse_dep(dep)
     except Exception:
         raise click.BadParameter('The dependency format should be e.g. react@16.2')
