@@ -70,7 +70,10 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     dep_name, dep_version = dep
 
     if dep_name == '.': # check the `pwd` project deps
+        click.echo('The dependency is a local directory, using whatever is currently in node_modules')
         project_dir = '.'
+        if not os.path.isdir(os.path.join(project_dir, 'node_modules')):
+            raise click.BadParameter('There are no node_modules to analyze in the project directory')
         package_json = os.path.join(project_dir, 'package.json')
         with open(package_json) as f:
             package_data = json.load(f)
