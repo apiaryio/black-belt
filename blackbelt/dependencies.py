@@ -403,7 +403,13 @@ def check_pre_approval_elligibility(details):
 
 def parse_dep(dep):
     split_result = re.split(r'==|@', dep)
-    try:
-        return (split_result[0], split_result[1])
-    except IndexError:
-        return (split_result[0], 'latest')
+    if split_result[0] != '':
+        try:
+            return (split_result[0], split_result[1])
+        except IndexError:
+            return (split_result[0], 'latest')
+    else:
+        try:
+            return ('@' + split_result[1], split_result[2])
+        except IndexError:
+            return ('@' + split_result[1], 'latest')
