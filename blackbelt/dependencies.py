@@ -66,8 +66,8 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     """
     ensure_executables(['npm', 'license-checker'])
 
-    click.echo('Analyzing the package...')
     dep_name, dep_version = dep
+    click.echo('Analyzing the package {0}@{1} ...'.format(dep_name, dep_version))
 
     if dep_name == '.': # check the `pwd` project deps
         click.echo('The dependency is a local directory, using whatever is currently in node_modules')

@@ -16,23 +16,9 @@ def validate_dep(ctx, param, dep):
     try:
         if dep == '.': # check the current project_dir
             return (dep, '*')
-        dep_name, dep_version = parse_dep(dep)
+        return parse_dep(dep)
     except Exception:
         raise click.BadParameter('The dependency format should be e.g. react@16.2')
-    else:
-        if dep_version == 'latest':
-            try:
-                response = requests.get('https://api.npms.io/v2/package/' + dep_name)
-                response.raise_for_status()
-                dep_version = response.json()['collected']['metadata']['version']
-            except requests.HTTPError as e:
-                if e.response.status_code == 404:
-                    raise click.BadParameter('The npm package does not exist')
-                else:
-                    if ctx.params.get('debug'):
-                        raise
-                    raise click.ClickException('Unable to figure out the package version. See --debug for more information.')
-        return (dep_name, dep_version)
 
 
 @cli.command()
