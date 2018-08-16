@@ -67,19 +67,17 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
     ensure_executables(['npm', 'license-checker'])
 
     dep_name, dep_version = dep
-    click.echo('Analyzing the package {0}@{1} ...'.format(dep_name, dep_version))
+    click.echo('Analyzing the package `{0}{1}` ...'.format(dep_name, '' if dep_version is None else '@' + dep_version))
 
-    if dep_name == '.': # check the `pwd` project deps
-        click.echo('The dependency is a local directory, using whatever is currently in node_modules')
-        project_dir = '.'
-        if not os.path.isdir(os.path.join(project_dir, 'node_modules')):
-            raise click.BadParameter('There are no node_modules to analyze in the project directory')
+    if dep_version is None: # check in the supplied project_dir
+        project_dir = dep_name
         package_json = os.path.join(project_dir, 'package.json')
         with open(package_json) as f:
             package_data = json.load(f)
         dep_name = package_data['name'];
         licenses = license_checker(project_dir)
     else:
+        # check the supplied npm dep_name@dep_version module by installing it first
         with tempfile.TemporaryDirectory() as tmp_dir:
             try:
                 install(dep_name, dep_version, tmp_dir, dev=dev)
