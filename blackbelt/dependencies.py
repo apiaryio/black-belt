@@ -103,7 +103,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
         'License: {licenses}\n'
         'Copyright Notice: {copyright_notice}\n'
         'Dependencies: {dependencies}\n'
-        'Elligible for Pre-Approval: {pre_approval_verdict}\n\n'
+        'Eligible for Pre-Approval: {pre_approval_verdict}\n\n'
         'Description: {description}\n'
         'Package: https://npmjs.com/package/{name}\n'
         'Repo: {repo}\n'
