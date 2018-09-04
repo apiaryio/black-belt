@@ -76,6 +76,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
             package_data = json.load(f)
         dep_name = package_data['name'];
         licenses = license_checker(project_dir)
+        package_tree = get_package_tree(project_dir)
     else:
         # check the supplied npm dep_name@dep_version module by installing it first
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -86,6 +87,7 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
                     raise
                 raise click.BadParameter('The npm package could not be installed')
             licenses = license_checker(tmp_dir)
+            package_tree = get_package_tree(tmp_dir)
 
     pre_approval_verdict = get_pre_approval_verdict(licenses)
     details, fourth_party_licenses = separate_top_level_details(licenses, dep_name)
@@ -138,6 +140,11 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
                 if details.get('license_file'):
                     click.echo(' ・ license file: {0}'.format(details['license_file']))
 
+                breadcrumbs = get_package_breadcrumbs(package_tree, details['name'], details['version'])
+                if len(breadcrumbs) > 0:
+                    for breadcrumb in breadcrumbs:
+                        click.echo(' ・ found in dependency path: {}'.format(' > '.join(breadcrumb)))
+
         if missing:
             click.echo(
                 '\nBad luck! Before adding the dependency to the approval '
@@ -153,7 +160,14 @@ def check(dep, list_path, licenses_path, dev=False, debug=False):
 def install(dep_name, dep_version, project_dir, dev=False):
     click.echo('Getting dependencies...')
     dep = '{0}@{1}'.format(dep_name, dep_version)
-    run(['npm', 'install', dep], cwd=project_dir)
+
+    package_json = os.path.join(project_dir, 'package.json')
+    if not os.path.exists(package_json):
+        # Create package.json - It is required to be able to run `npm ls`
+        with open(package_json, 'w') as fp:
+            fp.write('{"name": "black-belt"}')
+
+    run(['npm', 'install', '--save', dep], cwd=project_dir)
     if dev:
         click.echo('Getting dev dependencies...')
         shutil.copy(
@@ -273,6 +287,58 @@ def license_checker(project_dir):
 
         licenses.append(details)
     return licenses
+
+
+def get_package_tree(project_dir):
+    """
+    Returns the "tree" of the package and its dependencies in
+    the NPM ls json format.
+    """
+    output = run(['npm', 'ls', '--json'], cwd=project_dir, check=False)
+    return json.loads(output)
+
+
+def get_package_breadcrumbs(package_tree, name, version):
+    """
+    Takes a npm ls JSON tree and looks up the paths to the given
+    dependency (name and version).
+
+    Returns an array of paths. Where a path is an array of
+    dependencies leading to the given dependency in the tree.
+
+        >>> get_package_breadcrumbs(tree, 'minim', '1.0.0')
+        [
+            ['fury-adapter-swagger@1.0.0'],
+            ['fury@2.0.0'],
+            ['apielements@0.1.0', 'fury@2.0.0']
+        ]
+    """
+
+    def traverse_dependencies(dependencies, path):
+        """
+        Inline function to be called recursively to check for dependency and
+        pass down the path to further dependencies.
+        """
+
+        results = []
+
+        for dependency_name in dependencies:
+            dependency = dependencies[dependency_name]
+
+            if dependency_name == name and dependency['version'] == version:
+                # Found dependency in path
+                results.append(path)
+                continue
+
+            if 'dependencies' in dependency:
+                # Traverse dependency dependencies
+                sub_dependencies = dependency['dependencies']
+                path_component = '{}@{}'.format(dependency_name, dependency['version'])
+                results += traverse_dependencies(sub_dependencies, path + [path_component])
+
+        return results
+
+    return traverse_dependencies(package_tree['dependencies'], [])
 
 
 def ensure_executables(executables):
