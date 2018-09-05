@@ -325,7 +325,7 @@ def get_package_breadcrumbs(package_tree, name, version):
         for dependency_name in dependencies:
             dependency = dependencies[dependency_name]
 
-            if dependency_name == name and dependency['version'] == version:
+            if dependency_name == name and dependency.get('version') == version:
                 # Found dependency in path
                 results.append(path)
                 continue
@@ -368,9 +368,11 @@ def run(args, cwd=None, check=True):
         with open(os.devnull, 'w') as devnull:
             kwargs['stderr'] = devnull
             output = subprocess.check_output(args, **kwargs)
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         if check:
             raise
+        else:
+            return e.stdout.decode().strip()
     else:
         return output.decode().strip()
 
