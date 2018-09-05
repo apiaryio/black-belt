@@ -325,7 +325,7 @@ def get_package_breadcrumbs(package_tree, name, version):
         for dependency_name in dependencies:
             dependency = dependencies[dependency_name]
 
-            if dependency_name == name and dependency['version'] == version:
+            if dependency_name == name and 'version' in dependency and dependency['version'] == version:
                 # Found dependency in path
                 results.append(path)
                 continue
@@ -363,16 +363,9 @@ def ensure_executables(executables):
 
 # Unfortunately, we cannot use subprocess.run(), because BB still supports Py2
 def run(args, cwd=None, check=True):
-    kwargs = {'cwd': cwd}
-    try:
-        with open(os.devnull, 'w') as devnull:
-            kwargs['stderr'] = devnull
-            output = subprocess.check_output(args, **kwargs)
-    except subprocess.CalledProcessError:
-        if check:
-            raise
-    else:
-        return output.decode().strip()
+    with open(os.devnull, 'w') as devnull:
+        result = subprocess.run(args, cwd=cwd, check=check, stdout=subprocess.PIPE, stderr=devnull)
+        return result.stdout.decode().strip()
 
 
 def parse_license_names(value):
