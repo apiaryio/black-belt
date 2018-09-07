@@ -1,3 +1,8 @@
+
+<p align=center>⚠️ This project is idle since September 2018 ⚠️</p>
+
+-----------
+
 # Black Belt
 
 Black belt is collection of scripts, tools and guidelines used for developing projects The Apiary Way.
